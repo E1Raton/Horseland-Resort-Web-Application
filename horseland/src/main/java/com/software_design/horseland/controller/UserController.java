@@ -43,8 +43,8 @@ public class UserController {
     }
 
     @PutMapping("/user/{uuid}")
-    public User updateUser(@PathVariable UUID uuid, @RequestBody User user) {
-        return userService.updateUser(uuid, user);
+    public User updateUser(@PathVariable UUID uuid, @Valid @RequestBody UserCreateDTO userDTO) throws InputValidationException {
+        return userService.updateUser(uuid, userDTO);
     }
 
     @DeleteMapping("/user/{uuid}")

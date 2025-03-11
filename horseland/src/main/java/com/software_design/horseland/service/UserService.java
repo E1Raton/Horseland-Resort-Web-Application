@@ -44,14 +44,30 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(UUID uuid, User user) {
-        User existingUser =
-                userRepository.findById(uuid).orElseThrow(
-                        () -> new IllegalStateException("User with uuid " + uuid + " not found."));
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setUsername(user.getUsername());
+    public User updateUser(UUID uuid, UserCreateDTO userDTO) throws InputValidationException {
+        User existingUser = getUserById(uuid);
+
+        if (existingUser == null) {
+            throw new InputValidationException("User with uuid " + uuid + " not found");
+        }
+
+        User userByEmail = getUserByEmail(userDTO.getEmail());
+        if (userByEmail != null && !uuid.equals(existingUser.getId())) {
+            throw new InputValidationException("Email already used");
+        }
+
+        User userByUsername = getUserByUsername(userDTO.getUsername());
+        if (userByUsername != null && !uuid.equals(existingUser.getId())) {
+            throw new InputValidationException("Username already used");
+        }
+
+        existingUser.setFirstName(userDTO.getFirstName());
+        existingUser.setLastName(userDTO.getLastName());
+        existingUser.setBirthDate(userDTO.getBirthDate());
+        existingUser.setUsername(userDTO.getUsername());
+        existingUser.setEmail(userDTO.getEmail());
+        existingUser.setPassword(userDTO.getPassword());
+        existingUser.setRole(userDTO.getRole());
 
         return userRepository.save(existingUser);
     }
