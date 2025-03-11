@@ -2,7 +2,7 @@ package com.software_design.horseland.service;
 
 import com.software_design.horseland.exception.InputValidationException;
 import com.software_design.horseland.model.User;
-import com.software_design.horseland.model.UserCreateDTO;
+import com.software_design.horseland.model.UserDTO;
 import com.software_design.horseland.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User addUser(UserCreateDTO userDTO) throws InputValidationException {
+    public User addUser(UserDTO userDTO) throws InputValidationException {
 
         User userByUsername = getUserByUsername(userDTO.getUsername());
         if (userByUsername != null) {
@@ -44,7 +44,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(UUID uuid, UserCreateDTO userDTO) throws InputValidationException {
+    public User updateUser(UUID uuid, UserDTO userDTO) throws InputValidationException {
         User existingUser = getUserById(uuid);
 
         if (existingUser == null) {

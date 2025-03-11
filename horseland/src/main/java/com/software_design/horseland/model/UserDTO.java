@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.Period;
 
 @Data
-public class UserCreateDTO {
+public class UserDTO {
     @NotBlank(message = "First name is required")
     @Size(min = 2, max = 100, message = "First name should be between 2 and 100 characters")
     private String firstName;
@@ -38,11 +38,23 @@ public class UserCreateDTO {
     /**
      * Validates that the birth date is not more than 100 years ago.
      */
-    @AssertTrue(message = "User cannot be older than 100 years")
-    public boolean isBirthDateValid() {
+    @AssertFalse(message = "User cannot be older than 100 years")
+    public boolean isUserOlderThan100Years() {
         if (birthDate == null) {
             return false;
         }
-        return Period.between(birthDate, LocalDate.now()).getYears() <= 100;
+        return Period.between(birthDate, LocalDate.now()).getYears() > 100;
+    }
+
+    /**
+     * Validates that the user is an adult.
+     */
+    @AssertFalse(message = "User should be at least 18 years old")
+    public boolean isUserYoungerThan18Years() {
+        if (birthDate == null) {
+            return false;
+        }
+
+        return Period.between(birthDate, LocalDate.now()).getYears() < 18;
     }
 }
