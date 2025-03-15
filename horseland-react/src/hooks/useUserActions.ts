@@ -1,6 +1,7 @@
 // hooks/useUserActions.ts
-import User from '../model/user.model.tsx';
+import { User } from '../model/user.model.tsx';
 import { UserService } from '../service/UserService.ts';
+import React from "react";
 
 interface UseUserActionsProps {
     setData: React.Dispatch<React.SetStateAction<User[]>>;
@@ -15,7 +16,8 @@ const useUserActions = ({ setData, setSelectedUser, selectedUser }: UseUserActio
             setData(prevData => [...prevData, addedUser]);
         } catch (error) {
             console.error('Error adding user:', error);
-            alert('Failed to add user.');
+            const errorMessage = error instanceof Error ? error.message : error;
+            alert(errorMessage);
         }
     };
 
@@ -28,7 +30,8 @@ const useUserActions = ({ setData, setSelectedUser, selectedUser }: UseUserActio
             );
         } catch (error) {
             console.error('Error updating user:', error);
-            alert('Failed to update user.');
+            const errorMessage = error instanceof Error ? error.message : error;
+            alert(errorMessage);
         }
     };
 

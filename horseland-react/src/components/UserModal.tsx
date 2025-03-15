@@ -1,6 +1,5 @@
-// components/UserModal.tsx
 import React, { useState, useEffect } from 'react';
-import User from "../model/user.model.tsx";
+import { User, Role } from "../model/user.model.tsx"; // Assuming Role is also exported
 
 interface UserModalProps {
     isOpen: boolean;
@@ -18,12 +17,22 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
         setUser(initialUser);
     }, [initialUser]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setUser((prev) => ({
-            ...prev,
-            [name]: name === 'age' ? parseInt(value) : value,
-        }));
+
+        // Check if it's a select element
+        if (e.target instanceof HTMLSelectElement) {
+            setUser((prev) => ({
+                ...prev,
+                [name]: value as Role, // Role is the type of 'role'
+            }));
+        } else {
+            // Handle input and textarea fields
+            setUser((prev) => ({
+                ...prev,
+                [name]: name === 'birthDate' ? value : value, // Keep as string for simplicity
+            }));
+        }
     };
 
     const handleSubmit = async () => {
@@ -113,9 +122,9 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
                     value={user.role}
                     onChange={handleInputChange}
                 >
-                    <option value="ADMIN">Admin</option>
-                    <option value="STUDENT">Student</option>
-                    <option value="INSTRUCTOR">Instructor</option>
+                    <option value={Role.ADMIN}>Admin</option>
+                    <option value={Role.STUDENT}>Student</option>
+                    <option value={Role.INSTRUCTOR}>Instructor</option>
                 </select>
 
                 <div className="modal-buttons">

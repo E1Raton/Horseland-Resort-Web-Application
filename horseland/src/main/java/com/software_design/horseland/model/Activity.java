@@ -2,6 +2,7 @@ package com.software_design.horseland.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -29,11 +30,12 @@ public class Activity {
     @Column
     private LocalDate endDate;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_activity",
             joinColumns = @JoinColumn(name = "activity_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @Cascade({org.hibernate.annotations.CascadeType.MERGE})
     private Set<User> participants = new HashSet<>();
 }

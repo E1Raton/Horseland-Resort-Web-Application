@@ -1,6 +1,6 @@
 package com.software_design.horseland.service;
 
-import com.software_design.horseland.exception.InputValidationException;
+import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.model.UserDTO;
 import com.software_design.horseland.repository.UserRepository;
@@ -20,16 +20,16 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User addUser(UserDTO userDTO) throws InputValidationException {
+    public User addUser(UserDTO userDTO) throws DatabaseValidationException {
 
         User userByUsername = getUserByUsername(userDTO.getUsername());
         if (userByUsername != null) {
-            throw new InputValidationException("Username already used");
+            throw new DatabaseValidationException("Username already used");
         }
 
         User userByEmail = getUserByEmail(userDTO.getEmail());
         if (userByEmail != null) {
-            throw new InputValidationException("Email already used");
+            throw new DatabaseValidationException("Email already used");
         }
 
         User user = new User();
@@ -44,21 +44,21 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateUser(UUID uuid, UserDTO userDTO) throws InputValidationException {
+    public User updateUser(UUID uuid, UserDTO userDTO) throws DatabaseValidationException {
         User existingUser = getUserById(uuid);
 
         if (existingUser == null) {
-            throw new InputValidationException("User with uuid " + uuid + " not found");
+            throw new DatabaseValidationException("User with uuid " + uuid + " not found");
         }
 
         User userByEmail = getUserByEmail(userDTO.getEmail());
-        if (userByEmail != null && !uuid.equals(existingUser.getId())) {
-            throw new InputValidationException("Email already used");
+        if (userByEmail != null && !uuid.equals(userByEmail.getId())) {
+            throw new DatabaseValidationException("Email already used");
         }
 
         User userByUsername = getUserByUsername(userDTO.getUsername());
-        if (userByUsername != null && !uuid.equals(existingUser.getId())) {
-            throw new InputValidationException("Username already used");
+        if (userByUsername != null && !uuid.equals(userByUsername.getId())) {
+            throw new DatabaseValidationException("Username already used");
         }
 
         existingUser.setFirstName(userDTO.getFirstName());

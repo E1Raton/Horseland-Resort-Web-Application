@@ -1,7 +1,7 @@
 package com.software_design.horseland.config;
 
 import com.software_design.horseland.exception.ErrorResponse;
-import com.software_design.horseland.exception.InputValidationException;
+import com.software_design.horseland.exception.DatabaseValidationException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,9 +43,16 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(InputValidationException.class)
-    public String handleInputValidationException(InputValidationException ex) {
+    @ExceptionHandler(DatabaseValidationException.class)
+    public ErrorResponse handleInputValidationException(DatabaseValidationException ex) {
         log.error("Validation error: {}", ex.getMessage());
-        return ex.getMessage();
+
+        return new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                null,
+                ""
+        );
     }
 }

@@ -1,6 +1,6 @@
 // components/UserTable.tsx
 import DataTable, { TableColumn } from 'react-data-table-component';
-import User from '../model/user.model.tsx';
+import { User } from '../model/user.model.tsx';
 
 interface UserTableProps {
     data: User[];

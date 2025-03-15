@@ -15,4 +15,5 @@ interface User {
     role: Role;
 }
 
-export default User;
+export type { User };
+export { Role };

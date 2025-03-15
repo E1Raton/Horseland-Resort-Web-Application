@@ -28,6 +28,7 @@ public class ActivityService {
         existingActivity.setDescription(activity.getDescription());
         existingActivity.setStartDate(activity.getStartDate());
         existingActivity.setEndDate(activity.getEndDate());
+        existingActivity.setParticipants(activity.getParticipants());
 
         return activityRepository.save(existingActivity);
     }

@@ -1,7 +1,7 @@
 // App.tsx
 import { useState, useEffect } from 'react';
 import './App.css';
-import User from "./model/user.model.tsx";
+import { User }from "./model/user.model.tsx";
 import ThemeSwitcher from "./components/ThemeSwitcher.tsx";
 import UserTable from "./components/UserTable.tsx";
 import { UserService } from "./service/UserService.ts";

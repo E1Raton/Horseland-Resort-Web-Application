@@ -1,6 +1,6 @@
 package com.software_design.horseland.controller;
 
-import com.software_design.horseland.exception.InputValidationException;
+import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.UserDTO;
 import com.software_design.horseland.service.UserService;
 import com.software_design.horseland.model.User;
@@ -38,12 +38,12 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public User addUser(@Valid @RequestBody UserDTO userDTO) throws InputValidationException {
+    public User addUser(@Valid @RequestBody UserDTO userDTO) throws DatabaseValidationException {
         return userService.addUser(userDTO);
     }
 
     @PutMapping("/user/{uuid}")
-    public User updateUser(@PathVariable UUID uuid, @Valid @RequestBody UserDTO userDTO) throws InputValidationException {
+    public User updateUser(@PathVariable UUID uuid, @Valid @RequestBody UserDTO userDTO) throws DatabaseValidationException {
         return userService.updateUser(uuid, userDTO);
     }
 
