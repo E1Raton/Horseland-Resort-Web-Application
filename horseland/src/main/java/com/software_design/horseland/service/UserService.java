@@ -81,9 +81,9 @@ public class UserService {
         return userByEmail.orElse(null);
     }
 
-    public User getUserById(UUID uuid) {
+    public User getUserById(UUID uuid) throws DatabaseValidationException {
         return userRepository.findById(uuid).orElseThrow(
-                () -> new IllegalStateException("User with uuid " + uuid + " not found."));
+                () -> new DatabaseValidationException("User with uuid " + uuid + " not found."));
     }
 
     public User getUserByUsername(String username) {

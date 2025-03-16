@@ -39,7 +39,7 @@ public class UserDTO {
      * Validates that the birth date is not more than 100 years ago.
      */
     @AssertFalse(message = "User cannot be older than 100 years")
-    public boolean isUserOlderThan100Years() {
+    private boolean isUserOlderThan100Years() {
         if (birthDate == null) {
             return false;
         }
@@ -50,7 +50,7 @@ public class UserDTO {
      * Validates that the user is an adult.
      */
     @AssertFalse(message = "User should be at least 18 years old")
-    public boolean isUserYoungerThan18Years() {
+    private boolean isUserYoungerThan18Years() {
         if (birthDate == null) {
             return false;
         }

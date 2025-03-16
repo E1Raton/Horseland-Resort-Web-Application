@@ -23,7 +23,7 @@ public class UserController {
     }
 
     @GetMapping("/user/{uuid}")
-    public User getUserById(@PathVariable UUID uuid) {
+    public User getUserById(@PathVariable UUID uuid) throws DatabaseValidationException {
         return userService.getUserById(uuid);
     }
 

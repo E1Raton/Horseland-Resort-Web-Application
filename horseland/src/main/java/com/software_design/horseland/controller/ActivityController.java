@@ -1,7 +1,10 @@
 package com.software_design.horseland.controller;
 
+import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.Activity;
+import com.software_design.horseland.model.ActivityDTO;
 import com.software_design.horseland.service.ActivityService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +33,13 @@ public class ActivityController {
     }
 
     @PostMapping("/activity")
-    public Activity addActivity(@RequestBody Activity activity) {
-        return activityService.addActivity(activity);
+    public Activity addActivity(@Valid @RequestBody ActivityDTO activityDTO) throws DatabaseValidationException {
+        return activityService.addActivity(activityDTO);
     }
 
     @PutMapping("/activity/{uuid}")
-    public Activity updateActivity(@PathVariable UUID uuid, @RequestBody Activity activity) {
-        return activityService.updateActivity(uuid, activity);
+    public Activity updateActivity(@PathVariable UUID uuid, @Valid @RequestBody ActivityDTO activityDTO) throws DatabaseValidationException {
+        return activityService.updateActivity(uuid, activityDTO);
     }
 
     @DeleteMapping("/activity/{uuid}")

@@ -1,7 +1,10 @@
 package com.software_design.horseland.controller;
 
+import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.Horse;
+import com.software_design.horseland.model.HorseDTO;
 import com.software_design.horseland.service.HorseService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +23,7 @@ public class HorseController {
     }
 
     @GetMapping("/horse/{uuid}")
-    public Horse getHorseById(@PathVariable UUID uuid) {
+    public Horse getHorseById(@PathVariable UUID uuid) throws DatabaseValidationException {
         return horseService.getHorseById(uuid);
     }
 
@@ -30,13 +33,13 @@ public class HorseController {
     }
 
     @PostMapping("/horse")
-    public Horse addHorse(@RequestBody Horse horse) {
-        return horseService.addHorse(horse);
+    public Horse addHorse(@Valid @RequestBody HorseDTO horseDTO) throws DatabaseValidationException {
+        return horseService.addHorse(horseDTO);
     }
 
     @PutMapping("/horse/{uuid}")
-    public Horse updateHorse(@PathVariable UUID uuid, @RequestBody Horse horse) {
-        return horseService.updateHorse(uuid, horse);
+    public Horse updateHorse(@PathVariable UUID uuid, @Valid @RequestBody HorseDTO horseDTO) throws DatabaseValidationException {
+        return horseService.updateHorse(uuid, horseDTO);
     }
 
     @DeleteMapping("horse/{uuid}")
