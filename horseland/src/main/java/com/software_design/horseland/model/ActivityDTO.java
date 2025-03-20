@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 public class ActivityDTO {
 
-    @NotBlank
+    @NotBlank(message = "Name is required")
     private String name;
 
     @Size(max = 1000, message = "Description should be at most 1000 characters")
