@@ -83,6 +83,31 @@ public class ActivityService {
         return activityRepository.save(existingActivity);
     }
 
+    public Activity addParticipantToActivity(UUID uuid, UUID participantId) throws DatabaseValidationException {
+        Activity activity = getActivityById(uuid); // Throws exception if not found
+        User user = userRepository.findById(participantId)
+                .orElseThrow(() -> new DatabaseValidationException("User with uuid " + participantId + " not found"));
+
+        if (!activity.getParticipants().add(user)) {
+            throw new DatabaseValidationException("User is already registered for this activity");
+        }
+
+        return activityRepository.save(activity);
+    }
+
+    public Activity removeParticipantFromActivity(UUID activityId, UUID participantId) throws DatabaseValidationException {
+        Activity activity = getActivityById(activityId);
+
+        // Check if user is a participant
+        Optional<User> user = userRepository.findById(participantId);
+        if (user.isPresent() && activity.getParticipants().contains(user.get())) {
+            activity.getParticipants().remove(user.get());
+            return activityRepository.save(activity);
+        } else {
+            throw new DatabaseValidationException("User not registered for this activity.");
+        }
+    }
+
     public void deleteActivity(UUID uuid) {
         activityRepository.deleteById(uuid);
     }

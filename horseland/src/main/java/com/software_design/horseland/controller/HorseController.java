@@ -37,6 +37,11 @@ public class HorseController {
         return horseService.addHorse(horseDTO);
     }
 
+    @PostMapping("/horse/owner/{ownerId}")
+    public Horse addHorseToOwner(@PathVariable UUID ownerId, @Valid @RequestBody HorseDTO horseDTO) throws DatabaseValidationException {
+        return horseService.addHorseToOwner(horseDTO, ownerId);
+    }
+
     @PutMapping("/horse/{uuid}")
     public Horse updateHorse(@PathVariable UUID uuid, @Valid @RequestBody HorseDTO horseDTO) throws DatabaseValidationException {
         return horseService.updateHorse(uuid, horseDTO);

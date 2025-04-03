@@ -34,6 +34,19 @@ public class HorseService {
         return horseRepository.save(horse);
     }
 
+    public Horse addHorseToOwner(HorseDTO horseDTO, UUID ownerId) throws DatabaseValidationException {
+        Horse horse = new Horse();
+        horse.setName(horseDTO.getName());
+        horse.setBreed(horseDTO.getBreed());
+        horse.setBirthDate(horseDTO.getBirthDate());
+
+        // Check if owner exists
+        User userById = userService.getUserById(ownerId);
+        horse.setOwner(userById);
+
+        return horseRepository.save(horse);
+    }
+
     public Horse updateHorse(UUID uuid, HorseDTO horseDTO) throws DatabaseValidationException {
         Horse existingHorse = getHorseById(uuid);
 

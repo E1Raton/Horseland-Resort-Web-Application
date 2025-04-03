@@ -1,4 +1,3 @@
-
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -8,6 +7,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Light Theme Variables */
   --primary-bg-color: #ffffff;
   --primary-text-color: #121212;
   --table-bg-color: #f9f9f9;
@@ -15,22 +16,30 @@
   --button-bg: #e0e0e0;
   --button-text: #121212;
   --border-color: #ccc;
+  --logout-bg: #d9534f;
+  --logout-text: #ffffff;
+  --logout-hover-bg: #c9302c;
 }
 
-a {
-  font-weight: 500;
-  color: #4a90e2;
-  text-decoration: inherit;
+/* Dark Mode */
+[data-theme="dark"] {
+  --primary-bg-color: #121212;
+  --primary-text-color: rgba(255, 255, 255, 0.87);
+  --table-bg-color: #333333;
+  --highlight-bg-color: #444444;
+  --button-bg: #333333;
+  --button-text: #ffffff;
+  --border-color: #555;
+  --logout-bg: #b52e2b;
+  --logout-hover-bg: #a3221f;
 }
 
-a:hover {
-  color: #1d70b8;
-}
-
+/* General Styles */
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  justify-content: center;
+  align-items: center;
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--primary-bg-color);
@@ -44,17 +53,40 @@ h1 {
   color: var(--primary-text-color);
 }
 
+/* App Container - Adjusted for Both Login & Admin Panel */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* Admin Panel Specific Container */
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 90vw;
+  max-width: 1200px;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Buttons */
 button {
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
-  font-family: inherit;
   background-color: var(--button-bg);
   color: var(--button-text);
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: border-color 0.25s, background 0.3s;
 }
 
 button:hover {
@@ -66,28 +98,24 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/* Dark Mode */
-[data-theme="dark"] {
-  --primary-bg-color: #121212;
-  --primary-text-color: rgba(255, 255, 255, 0.87);
-  --table-bg-color: #333333;
-  --highlight-bg-color: #444444;
-  --button-bg: #333333;
-  --button-text: #ffffff;
-  --border-color: #555;
+/* Logout Button */
+.logout-button {
+  margin-top: 1rem;
+  background-color: var(--logout-bg);
+  color: var(--logout-text);
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-/* App-specific Styles */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  width: 100vw;
-  text-align: center;
+.logout-button:hover {
+  background-color: var(--logout-hover-bg);
 }
 
+/* Table Container */
 .table-container {
   width: 80%;
   max-width: 800px;
@@ -99,6 +127,7 @@ button:focus-visible {
   transition: background 0.3s ease;
 }
 
+/* Theme Toggle Button */
 .theme-toggle {
   margin-bottom: 1rem;
   padding: 0.6em 1.2em;
@@ -116,9 +145,11 @@ button:focus-visible {
   background-color: var(--highlight-bg-color);
 }
 
+/* Button Group for CRUD Operations */
 .button-group {
   display: flex;
   gap: 10px;
+  margin-top: 1rem;
 }
 
 .btn {
@@ -188,7 +219,7 @@ button:focus-visible {
   border: 1px solid var(--border-color);
 }
 
-
+/* Modal Button Group */
 .modal-buttons {
   display: flex;
   justify-content: space-around;
@@ -206,4 +237,86 @@ button:focus-visible {
 
 .modal-buttons button:hover {
   background-color: var(--highlight-bg-color);
+}
+
+/* Form Styling */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  background: var(--table-bg-color);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  justify-content: center; /* Ensures the content is vertically centered */
+  text-align: center; /* Added to center the form elements */
+}
+
+/* Form Group */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+}
+
+/* Label Styling */
+.form-group label {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: var(--primary-text-color);
+}
+
+/* Input Field Styles */
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background-color: var(--highlight-bg-color);
+  color: var(--primary-text-color);
+  transition: border 0.3s ease;
+}
+
+/* Input Field Focus */
+.form-group input:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+/* Center the Error Message */
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  text-align: center; /* Ensures error message is centered */
+}
+
+/* Button Styling for Login Form */
+button {
+  margin-top: 10px;
+  width: auto; /* Changed to 'auto' to prevent button from stretching */
+  padding: 0.6em 1.2em;
+}
+
+/* Button Styling for Logout Button */
+.logout-button {
+  margin-top: 1rem;
+  background-color: var(--logout-bg);
+  color: var(--logout-text);
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: var(--logout-hover-bg);
 }

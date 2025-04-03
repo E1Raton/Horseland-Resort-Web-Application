@@ -1,0 +1,102 @@
+/* UserDashboard.css */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: #1c1c1c; /* Dark grey */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Aligns items to the top */
+    padding: 20px;
+    position: fixed;
+    height: 100%;
+    top: 0;
+    left: 0;
+    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 50px; /* Space between title and menu */
+    text-align: center; /* Center the "Dashboard" title */
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center menu items horizontally */
+    justify-content: flex-start; /* Align menu items to the top */
+    flex-grow: 1; /* Allows menu to take up available space */
+    gap: 25px; /* Space between items */
+}
+
+.sidebar-menu li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.2rem;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    border-radius: 8px;
+    width: 100%; /* Ensure the buttons expand to full width */
+    text-align: center; /* Center the text */
+}
+
+.sidebar-menu li:hover {
+    background: #333; /* Slightly lighter grey */
+}
+
+.sidebar-menu li.active {
+    background: #555; /* Medium grey */
+}
+
+/* Logout as a Menu Item */
+.sidebar-menu li.logout {
+    color: white;
+    background-color: #e74c3c; /* Red color */
+    margin-top: 20px; /* Moves it slightly up from the bottom */
+}
+
+.sidebar-menu li.logout:hover {
+    background: #c0392b; /* Darker red on hover */
+}
+
+/* Icons */
+.icon {
+    color: white;
+}
+
+/* Content */
+.content {
+    margin-left: 260px; /* Sidebar width + spacing */
+    padding: 30px;
+    flex-grow: 1;
+    background-color: white;
+    /*box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Notification Box */
+.notification-box {
+    background: #eee;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #333;
+}

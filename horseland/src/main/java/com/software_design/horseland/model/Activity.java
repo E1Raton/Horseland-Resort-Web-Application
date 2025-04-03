@@ -38,4 +38,8 @@ public class Activity {
     )
 //    @Cascade({org.hibernate.annotations.CascadeType.MERGE})
     private Set<User> participants = new HashSet<>();
+
+    public void addParticipant(User user) {
+        participants.add(user);
+    }
 }

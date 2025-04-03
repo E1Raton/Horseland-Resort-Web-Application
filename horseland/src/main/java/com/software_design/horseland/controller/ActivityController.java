@@ -42,6 +42,16 @@ public class ActivityController {
         return activityService.updateActivity(uuid, activityDTO);
     }
 
+    @PutMapping("/activity/{uuid}/register/{participantId}")
+    public Activity addParticipantToActivity(@PathVariable UUID uuid, @PathVariable UUID participantId) throws DatabaseValidationException {
+        return activityService.addParticipantToActivity(uuid, participantId);
+    }
+
+    @PutMapping("/activity/{uuid}/deregister/{participantId}")
+    public Activity removeParticipantFromActivity(@PathVariable UUID uuid, @PathVariable UUID participantId) throws DatabaseValidationException {
+        return activityService.removeParticipantFromActivity(uuid, participantId);
+    }
+
     @DeleteMapping("/activity/{uuid}")
     public void deleteActivity(@PathVariable UUID uuid) {
         activityService.deleteActivity(uuid);
