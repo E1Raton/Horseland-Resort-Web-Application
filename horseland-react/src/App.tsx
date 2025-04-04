@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login.tsx";
 import AdminPanel from "./components/AdminPanel.tsx";
-import UserDashboard from "./components/UserDashboard.tsx";
+import UserDashboard from "./components/UserDashboard/UserDashboard.tsx";
 
 function App() {
     return (

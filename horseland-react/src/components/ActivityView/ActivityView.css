@@ -3,7 +3,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    justify-content: space-around;
+    justify-content: flex-start; /* Align items to the left */
+    width: 100%;
 }
 
 /* Activity Card */
@@ -84,4 +85,44 @@
     color: #888;
     text-align: center;
     margin-top: 10px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.search-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.sort-dropdown {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.controls {
+    position: sticky; /* Keeps the controls fixed when scrolling */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white; /* Matches the page background */
+    padding: 15px 20px;
+    z-index: 100; /* Ensures it stays above other elements */
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-start; /* Align items to the left */
+    border-bottom: 2px solid #ddd; /* Optional: Adds a slight separation */
 }

@@ -6,6 +6,7 @@ import com.software_design.horseland.model.ActivityDTO;
 import com.software_design.horseland.service.ActivityService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +31,25 @@ public class ActivityController {
     @GetMapping("/activity/name/{name}")
     public Activity getActivityByName(@PathVariable String name) {
         return activityService.getActivityByName(name);
+    }
+
+    @GetMapping("/activity/ordered/{order}")
+    public List<Activity> getActivityByOrder(@PathVariable String order) {
+        return switch (order) {
+            case "date" -> activityService.getSortedActivities(Sort.by(Sort.Direction.DESC, "startDate"));
+            case "name" -> activityService.getSortedActivities(Sort.by(Sort.Direction.ASC, "name"));
+            default -> getAllActivities();
+        };
+    }
+
+    @GetMapping("/activity/search/name/{search}")
+    public List<Activity> searchActivityByName(@PathVariable String search) {
+        return activityService.searchByName(search);
+    }
+
+    @GetMapping("/activity/future")
+    public List<Activity> getFutureActivities() {
+        return activityService.getFutureActivities();
     }
 
     @PostMapping("/activity")

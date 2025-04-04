@@ -7,8 +7,10 @@ import com.software_design.horseland.model.User;
 import com.software_design.horseland.repository.ActivityRepository;
 import com.software_design.horseland.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -19,6 +21,18 @@ public class ActivityService {
 
     public List<Activity> getActivities() {
         return activityRepository.findAll();
+    }
+
+    public List<Activity> getSortedActivities(Sort sort) {
+        return activityRepository.findAll(sort);
+    }
+
+    public List<Activity> searchByName(String search) {
+        return activityRepository.findByNameContainingIgnoreCase(search);
+    }
+
+    public List<Activity> getFutureActivities() {
+        return activityRepository.findByStartDateAfter(LocalDate.now());
     }
 
     public Activity addActivity(ActivityDTO activityDTO) throws DatabaseValidationException {
