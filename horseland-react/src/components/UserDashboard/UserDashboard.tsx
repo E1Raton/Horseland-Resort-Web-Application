@@ -4,6 +4,7 @@ import { FaHorseHead, FaClipboardList, FaBell, FaSignOutAlt } from "react-icons/
 import HorseView from "../HorseView.tsx";
 import ActivityView from "../ActivityView/ActivityView.tsx";
 import "./UserDashboard.css";
+import NotificationView from "../NotificationView.tsx";
 
 const UserDashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -42,7 +43,7 @@ const UserDashboard: React.FC = () => {
             <main className="content">
                 {selectedTab === "horses" && <HorseView />}
                 {selectedTab === "activities" && <ActivityView />}
-                {selectedTab === "notifications" && <div className="notification-box">No new notifications</div>}
+                {selectedTab === "notifications" && <NotificationView />}
             </main>
         </div>
     );

@@ -2,7 +2,7 @@ package com.software_design.horseland.controller;
 
 import com.software_design.horseland.model.LoginRequest;
 import com.software_design.horseland.model.LoginResponse;
-import com.software_design.horseland.service.LoginService;
+import com.software_design.horseland.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @CrossOrigin
-public class LoginController {
-    private final LoginService loginService;
+public class AuthController {
+    private final AuthService loginService;
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse loginResponse = loginService.login(loginRequest.username(), loginRequest.password());
         if (loginResponse.success()) {

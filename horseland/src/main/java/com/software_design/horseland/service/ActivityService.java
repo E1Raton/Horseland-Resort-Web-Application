@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -33,6 +34,13 @@ public class ActivityService {
 
     public List<Activity> getFutureActivities() {
         return activityRepository.findByStartDateAfter(LocalDate.now());
+    }
+
+    public List<Activity> getByParticipantId(UUID participantId) {
+        return getActivities().stream()
+                .filter(activity -> activity.getParticipants().stream()
+                        .anyMatch(participant -> participant.getId().equals(participantId)))
+                .collect(Collectors.toList());
     }
 
     public Activity addActivity(ActivityDTO activityDTO) throws DatabaseValidationException {
