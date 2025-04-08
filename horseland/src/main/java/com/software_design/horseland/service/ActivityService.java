@@ -67,6 +67,7 @@ public class ActivityService {
         }
 
         activity.setName(activityDTO.getName());
+        activity.setDescription(activityDTO.getDescription());
         activity.setStartDate(activityDTO.getStartDate());
         activity.setEndDate(activityDTO.getEndDate());
         activity.setParticipants(participants);
@@ -86,21 +87,6 @@ public class ActivityService {
         existingActivity.setDescription(activityDTO.getDescription());
         existingActivity.setStartDate(activityDTO.getStartDate());
         existingActivity.setEndDate(activityDTO.getEndDate());
-
-        Set<User> participants = new HashSet<>();
-        if (activityDTO.getParticipantsIds() != null) {
-            for (UUID participantId : activityDTO.getParticipantsIds()) {
-                Optional<User> participant = userRepository.findById(participantId);
-                if (participant.isPresent()) {
-                    participants.add(participant.get());
-                }
-                else {
-                    throw new DatabaseValidationException("User with uuid " + participantId + " not found");
-                }
-            }
-        }
-
-        existingActivity.setParticipants(participants);
 
         return activityRepository.save(existingActivity);
     }
@@ -135,8 +121,7 @@ public class ActivityService {
     }
 
     public Activity getActivityById(UUID uuid) {
-        return activityRepository.findById(uuid).orElseThrow(
-                () -> new IllegalStateException("Activity with uuid " + uuid + " not found"));
+        return activityRepository.findById(uuid).orElse(null);
     }
 
     public Activity getActivityByName(String name) {

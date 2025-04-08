@@ -1,6 +1,9 @@
 {
-  "name": "a",
-  "password": "",
-  "age": null,
-  "email": ""
+  "firstName": "a",
+  "lastName": "Patrick",
+  "birthDate": "1700-10-10",
+  "username": "a",
+  "email": "email",
+  "password": "1234",
+  "role": null
 }

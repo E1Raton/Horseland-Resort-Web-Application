@@ -13,10 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,5 +68,70 @@ public class UserServiceTests {
         assertEquals(savedUser, result);
         assertNotNull(result.getId());
         verify(userRepository, times(1)).save(any());
+    }
+
+    @Test
+    void testUpdateUser() throws DatabaseValidationException {
+        // given:
+        UUID uuid = UUID.randomUUID();
+        User user = new User();
+        user.setId(uuid);
+        user.setFirstName("Percy");
+        user.setLastName("Jackson");
+        user.setBirthDate(LocalDate.of(2003, 8, 12));
+        user.setUsername("percy03");
+        user.setEmail("percy.jackson@horseland.com");
+        user.setPassword("password");
+        user.setRole(Role.STUDENT);
+
+        User updatedUser = new User();
+        updatedUser.setId(uuid);
+        updatedUser.setFirstName("Ela");
+        updatedUser.setLastName("Smith");
+        updatedUser.setBirthDate(LocalDate.of(2005, 7, 21));
+        updatedUser.setUsername("ela_smith");
+        updatedUser.setEmail("ela@example.com");
+        updatedUser.setPassword("password123");
+        updatedUser.setRole(Role.INSTRUCTOR);
+
+        UserDTO updatedUserDTO =
+                new UserDTO("Ela", "Smith", LocalDate.of(2005, 7, 21), "ela_smith", "ela@example.com", "password123", Role.INSTRUCTOR);
+
+        // when:
+        when(userRepository.findById(uuid)).thenReturn(Optional.of(user));
+        when(userRepository.save(any())).thenReturn(updatedUser);
+        User result = userService.updateUser(uuid, updatedUserDTO);
+
+        // then:
+        assertEquals("Ela", result.getFirstName());
+        verify(userRepository, times(1)).findById(uuid);
+        verify(userRepository, times(1)).save(updatedUser);
+    }
+
+    @Test
+    void testUpdateUserNotFound() {
+        // given:
+        UUID uuid = UUID.randomUUID();
+        UserDTO userDTO = new UserDTO();
+
+        // when:
+        when(userRepository.findById(uuid)).thenReturn(Optional.empty());
+
+        // then:
+        assertThrows(DatabaseValidationException.class, () -> userService.updateUser(uuid, userDTO));
+        verify(userRepository, times(1)).findById(uuid);
+    }
+
+    @Test
+    void testDeleteUser() {
+        // given:
+        UUID uuid = UUID.randomUUID();
+
+        // when:
+        doNothing().when(userRepository).deleteById(uuid);
+        userService.deleteUser(uuid);
+
+        // then:
+        verify(userRepository, times(1)).deleteById(uuid);
     }
 }

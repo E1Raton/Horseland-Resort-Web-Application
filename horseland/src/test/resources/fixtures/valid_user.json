@@ -1,6 +1,9 @@
 {
-  "name": "Alice Smith",
-  "password": "securepass",
-  "age": 28,
-  "email": "alice.smith@example.com"
+  "firstName": "James",
+  "lastName": "Bond",
+  "birthDate": "1982-10-10",
+  "username": "bond007",
+  "email": "bond@email.com",
+  "password": "12345678",
+  "role": "INSTRUCTOR"
 }

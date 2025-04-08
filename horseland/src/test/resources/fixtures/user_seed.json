@@ -1,16 +1,20 @@
 [
   {
-    "id": null,
-    "name": "John Doe",
+    "firstName": "John",
+    "lastName": "Doe",
+    "birthDate": "2001-10-21",
+    "username": "john_doe",
+    "email": "johndoe@company.com",
     "password": "password_john",
-    "age": 30,
-    "email": "john.doe@example.com"
+    "role": "STUDENT"
   },
   {
-    "id": null,
-    "name": "Jane Doe",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "birthDate": "2002-07-12",
+    "username": "jane_doe",
+    "email": "janedoe@company.com",
     "password": "password_jane",
-    "age": 25,
-    "email": "jane.doe@example.com"
+    "role": "STUDENT"
   }
 ]

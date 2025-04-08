@@ -17,4 +17,6 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
     List<Activity> findByNameContainingIgnoreCase(String search);
 
     List<Activity> findByStartDateAfter(LocalDate date);
+
+//    List<Activity> findByParticipantId(UUID participantId);
 }

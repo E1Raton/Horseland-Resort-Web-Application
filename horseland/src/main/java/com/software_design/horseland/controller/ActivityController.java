@@ -33,6 +33,11 @@ public class ActivityController {
         return activityService.getActivityByName(name);
     }
 
+    @GetMapping("/activity/participant/{participantId}")
+    public List<Activity> getActivityByParticipantId(@PathVariable UUID participantId) {
+        return activityService.getByParticipantId(participantId);
+    }
+
     @GetMapping("/activity/ordered/{order}")
     public List<Activity> getActivityByOrder(@PathVariable String order) {
         return switch (order) {

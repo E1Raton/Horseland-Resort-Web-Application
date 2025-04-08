@@ -3,12 +3,14 @@ package com.software_design.horseland.model;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.Period;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDTO {
     @NotBlank(message = "First name is required")
     @Size(min = 2, max = 100, message = "First name should be between 2 and 100 characters")
