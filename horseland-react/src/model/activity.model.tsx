@@ -4,7 +4,7 @@ interface Activity {
     description: string;
     startDate: string;
     endDate: string;
-    participants: { id: string }[]; // assuming participants is an array of user objects with an id field
+    participants: { id: string }[];
 }
 
 export type { Activity };

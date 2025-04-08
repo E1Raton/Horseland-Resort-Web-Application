@@ -32,8 +32,8 @@ const Login: React.FC = () => {
 
                 // Save user data in localStorage and sessionStorage
                 sessionStorage.setItem('userId', data.userId);
-                localStorage.setItem('authToken', data.token);
-                localStorage.setItem('userRole', data.role); // Save the role (admin, student, instructor)
+                sessionStorage.setItem('authToken', data.token);
+                sessionStorage.setItem('userRole', data.role); // Save the role (admin, student, instructor)
 
                 // Redirect based on user role
                 if (/^admin$/i.test(data.role)) {

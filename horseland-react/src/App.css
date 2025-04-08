@@ -320,3 +320,13 @@ button {
 .logout-button:hover {
   background-color: var(--logout-hover-bg);
 }
+
+/* Add margin between the buttons inside the toggle-buttons container */
+.toggle-buttons button {
+  margin-right: 20px; /* Adjust this value to your preference */
+}
+
+/* Optional: Remove margin from the last button */
+.toggle-buttons button:last-child {
+  margin-right: 0;
+}

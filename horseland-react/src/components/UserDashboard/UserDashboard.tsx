@@ -11,8 +11,9 @@ const UserDashboard: React.FC = () => {
     const [selectedTab, setSelectedTab] = useState<"horses" | "activities" | "notifications">("horses");
 
     const handleLogout = () => {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userRole");
+        sessionStorage.removeItem("authToken");
+        sessionStorage.removeItem("userRole");
+        sessionStorage.removeItem("userId");
         navigate("/login");
     };
 

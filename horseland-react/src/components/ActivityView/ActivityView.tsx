@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./ActivityView.css";
-import RegisterButton from "../RegisterButton.tsx";
-import useRegisteredActivities from "../../hooks/useRegisteredActivities.ts";
 import { ActivityService } from "../../service/ActivityService.ts";
 import { Activity } from "../../model/activity.model.tsx";
 
@@ -11,47 +9,71 @@ const ActivityView: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("date");
     const [onlyFutureActivities, setOnlyFutureActivities] = useState(false);
+    const [userActivities, setUserActivities] = useState<Set<string>>(new Set()); // Store activity IDs the user is registered for
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const userId = localStorage.getItem("userId");
-    const { registeredActivities, registerActivity, unregisterActivity } = useRegisteredActivities(userId);
+    const userId = sessionStorage.getItem("userId");
 
     useEffect(() => {
-        fetchActivities();
-    }, [userId, onlyFutureActivities]); // <-- Fetch again when user toggles future activities
+        if (userId) {
+            fetchActivities();
+        } else {
+            setLoading(false);
+        }
+    }, [userId, onlyFutureActivities]);
 
     useEffect(() => {
         filterAndSortActivities();
     }, [activities, searchTerm, sortBy, onlyFutureActivities]);
 
     // Fetch activities from the backend
+    // Fetch activities from the backend
     const fetchActivities = async () => {
+        if (!userId) {
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
         try {
             let data;
 
+            // Fetch activities based on the "only future" filter
             if (onlyFutureActivities) {
-                data = await ActivityService.fetchFutureActivities(); // New backend endpoint
+                data = await ActivityService.fetchFutureActivities(); // Fetch only future activities
             } else {
-                data = await ActivityService.fetchActivities(); // All activities
+                data = await ActivityService.fetchActivities(); // Fetch all activities
             }
 
             setActivities(data);
 
-            // Set initial registration state
-            if (userId) {
-                const initialRegistrations = new Set<string>();
-                data.forEach((activity: Activity) => {
-                    activity.participants.forEach((participant) => {
-                        if (participant.id === userId) {
-                            initialRegistrations.add(activity.id);
-                        }
-                    });
-                });
+            // Check user registration for the activities
+            updateUserActivities(data);
 
-                initialRegistrations.forEach((activityId) => registerActivity(activityId));
-            }
-        } catch (error) {
-            console.error("Failed to fetch activities", error);
+        } catch (err) {
+            setError("Failed to fetch activities. Please try again later.");
+            console.error("Error fetching activities:", err);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    // Updates the userActivities set based on the activities fetched
+    const updateUserActivities = (activities: Activity[]) => {
+        const registeredActivityIds = new Set<string>();
+
+        activities.forEach((activity: Activity) => {
+            if (activity.participants && Array.isArray(activity.participants)) {
+                // Check if the user is in the participantsIds for this activity
+                if (activity.participants.some(participant => participant.id === userId)) {
+                    registeredActivityIds.add(activity.id); // Add activity to registered set
+                }
+            }
+        });
+
+        setUserActivities(registeredActivityIds);
     };
 
     // Handles filtering and sorting
@@ -79,20 +101,29 @@ const ActivityView: React.FC = () => {
         if (!userId) return;
 
         if (window.confirm("Are you sure you want to register for this activity?")) {
-            const success = await ActivityService.registerActivity(activityId, userId);
-            if (success) registerActivity(activityId);
+            setLoading(true);
+            setError(null);
+            try {
+                const success = await ActivityService.registerActivity(activityId, userId);
+                if (success) {
+                    await fetchActivities(); // Refetch activities after registration
+                }
+            } catch (err) {
+                setError("Failed to register for the activity.");
+                console.error("Error registering activity:", err);
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
-    // Unregister the user from an activity
-    const handleUnregister = async (activityId: string) => {
-        if (!userId) return;
+    if (loading) {
+        return <div className="loading">Loading activities...</div>;
+    }
 
-        if (window.confirm("Are you sure you want to unregister from this activity?")) {
-            const success = await ActivityService.unregisterActivity(activityId, userId);
-            if (success) unregisterActivity(activityId);
-        }
-    };
+    if (error) {
+        return <div className="error">{error}</div>;
+    }
 
     return (
         <div className="activity-view">
@@ -128,7 +159,8 @@ const ActivityView: React.FC = () => {
             {/* Activities List Section */}
             <div className="activity-container">
                 {filteredActivities.map((activity) => {
-                    const isRegistered = registeredActivities.has(activity.id);
+                    const isRegistered = userActivities.has(activity.id); // Check if the user is registered for the activity
+                    const isFutureActivity = new Date(activity.startDate) > new Date();
 
                     return (
                         <div key={activity.id} className="activity-card">
@@ -138,13 +170,12 @@ const ActivityView: React.FC = () => {
                                 Start Date: {activity.startDate} <br /> End Date: {activity.endDate}
                             </p>
 
-                            {new Date(activity.startDate) > new Date() ? (
-                                <RegisterButton
-                                    activityId={activity.id}
-                                    isRegistered={isRegistered}
-                                    onRegister={() => handleRegister(activity.id)}
-                                    onUnregister={() => handleUnregister(activity.id)}
-                                />
+                            {isFutureActivity ? (
+                                isRegistered ? (
+                                    <div className="activity-status">Already registered</div>
+                                ) : (
+                                    <button className="register-button" onClick={() => handleRegister(activity.id)}>Register</button>
+                                )
                             ) : (
                                 <div className="activity-status">Activity has ended</div>
                             )}
