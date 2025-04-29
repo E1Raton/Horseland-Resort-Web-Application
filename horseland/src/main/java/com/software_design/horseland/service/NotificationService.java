@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -42,80 +40,78 @@ public class NotificationService {
 
     public List<Notification> addNotifications(UUID userId) {
 
-        List<Activity> activities = activityService.getByParticipantId(userId);
-        List<Activity> upcomingActivities = activities.stream()
-                .filter(a -> Math.abs(Period.between(LocalDate.now(), a.getStartDate()).getDays()) < DAYS_INTERVAL)
+        LocalDate today = LocalDate.now();
+
+        return activityService.getByParticipantId(userId).stream()
+                .filter(activity -> Math.abs(Period.between(today, activity.getStartDate()).getDays()) < DAYS_INTERVAL)
+                .map(activity -> processActivityNotification(userId, activity, today))
+                .filter(Objects::nonNull)
                 .toList();
+    }
 
-        List<Notification> result = new ArrayList<>();
+    private Notification processActivityNotification(UUID userId, Activity activity, LocalDate today) {
+        UUID activityId = activity.getId();
+        NotificationPreference preference = notificationPreferenceRepository.findByUserIdAndActivityId(userId, activityId);
 
-        for (Activity activity : upcomingActivities) {
-            NotificationPreference notificationPreference = notificationPreferenceRepository.findByUserIdAndActivityId(userId, activity.getId());
-            if (notificationPreference != null) {
-                if (notificationPreference.getActive()) {
-                    Notification notification = notificationRepository.findByUserIdAndActivityId(userId, activity.getId());
-                    if (notification == null) {
-                        notification = new Notification();
-                        notification.setUserId(userId);
-                        notification.setActivityId(activity.getId());
-                        notification.setTitle(activity.getName());
-                        notification.setMessage("Event in " + Period.between(LocalDate.now(), activity.getStartDate()).getDays() + " days!");
-                        notification.setDateTime(LocalDateTime.now());
-                        result.add(notificationRepository.save(notification));
-                    }
-                    else {
-                        result.remove(notification);
-                        Notification updatedNot = updateNotification(notification.getId());
-                        result.add(updatedNot);
-                    }
-                }
-            }
-            else {
-                NotificationPreference newNotificationPreference = new NotificationPreference();
-                newNotificationPreference.setUserId(userId);
-                newNotificationPreference.setActivityId(activity.getId());
-                newNotificationPreference.setActive(true);
-                addNotificationPreference(newNotificationPreference);
-
-                Notification notification = new Notification();
-                notification.setUserId(userId);
-                notification.setActivityId(activity.getId());
-                notification.setTitle(activity.getName());
-                notification.setMessage("Event in " + Period.between(LocalDate.now(), activity.getStartDate()).getDays() + " days!");
-                notification.setDateTime(LocalDateTime.now());
-                result.add(addNotification(notification));
-            }
+        if (preference != null && Boolean.TRUE.equals(preference.getActive())) {
+            return upsertNotification(userId, activity, today);
         }
 
-        return result;
+        if (preference == null) {
+            createAndSaveNotificationPreference(userId, activityId);
+            return createAndSaveNotification(userId, activity, today);
+        }
+
+        return null; // No notification needed if preference exists but is inactive
+    }
+
+    private Notification upsertNotification(UUID userId, Activity activity, LocalDate today) {
+        Notification existing = notificationRepository.findByUserIdAndActivityId(userId, activity.getId());
+
+        return (existing == null)
+                ? createAndSaveNotification(userId, activity, today)
+                : updateNotification(existing.getId());
+    }
+
+    private Notification createAndSaveNotification(UUID userId, Activity activity, LocalDate today) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setActivityId(activity.getId());
+        notification.setTitle(activity.getName());
+        notification.setMessage("Event in " + Period.between(today, activity.getStartDate()).getDays() + " days!");
+        notification.setDateTime(LocalDateTime.now());
+
+        return notificationRepository.save(notification);
+    }
+
+    private void createAndSaveNotificationPreference(UUID userId, UUID activityId) {
+        NotificationPreference preference = new NotificationPreference();
+        preference.setUserId(userId);
+        preference.setActivityId(activityId);
+        preference.setActive(true);
+        addNotificationPreference(preference);
     }
 
     public Notification updateNotification(UUID id) {
         Notification notification = getNotificationById(id);
-        if (notification != null) {
-            Activity activity = activityService.getActivityById(notification.getActivityId());
+        if (notification == null) return null;
 
-            if (activity != null) {
-                notification.setDateTime(LocalDateTime.now());
-                notification.setMessage("Event in " + Period.between(LocalDate.now(), activity.getStartDate()).getDays() + " days!");
+        Activity activity = activityService.getActivityById(notification.getActivityId());
+        if (activity == null) return null;
 
-                return notificationRepository.save(notification);
-            }
-        }
-
-        return null;
+        notification.setDateTime(LocalDateTime.now());
+        notification.setMessage("Event in " + Period.between(LocalDate.now(), activity.getStartDate()).getDays() + " days!");
+        return notificationRepository.save(notification);
     }
 
     public void disableAndDeleteNotification(UUID userId, UUID activityId) {
-        NotificationPreference notificationPreference = notificationPreferenceRepository.findByUserIdAndActivityId(userId, activityId);
-        if (notificationPreference != null) {
-            notificationPreference.setActive(false);
-            notificationPreferenceRepository.save(notificationPreference);
-        }
+        Optional.ofNullable(notificationPreferenceRepository.findByUserIdAndActivityId(userId, activityId))
+                .ifPresent(pref -> {
+                    pref.setActive(false);
+                    notificationPreferenceRepository.save(pref);
+                });
 
-        Notification notification = notificationRepository.findByUserIdAndActivityId(userId, activityId);
-        if (notification != null) {
-            notificationRepository.delete(notification);
-        }
+        Optional.ofNullable(notificationRepository.findByUserIdAndActivityId(userId, activityId))
+                .ifPresent(notificationRepository::delete);
     }
 }

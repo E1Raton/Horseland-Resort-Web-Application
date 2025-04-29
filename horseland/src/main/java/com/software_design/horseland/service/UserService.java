@@ -26,14 +26,14 @@ public class UserService {
         if (isEmailAlreadyUsed(userDTO.getEmail(), null)) {
             throw new DatabaseValidationException("Email already used");
         }
-
-        if (isUsernameAlreadyUsed(userDTO.getUsername(), null)) {
+        else if (isUsernameAlreadyUsed(userDTO.getUsername(), null)) {
             throw new DatabaseValidationException("Username already used");
         }
-
-        User user = new User();
-        updateUserFields(user, userDTO);
-        return userRepository.save(user);
+        else {
+            User user = new User();
+            updateUserFields(user, userDTO);
+            return userRepository.save(user);
+        }
     }
 
     private boolean isEmailAlreadyUsed(String email, UUID uuid) {
@@ -65,13 +65,13 @@ public class UserService {
         if (isEmailAlreadyUsed(userDTO.getEmail(), uuid)) {
             throw new DatabaseValidationException("Email already used");
         }
-
-        if (isUsernameAlreadyUsed(userDTO.getUsername(), uuid)) {
+        else if (isUsernameAlreadyUsed(userDTO.getUsername(), uuid)) {
             throw new DatabaseValidationException("Username already used");
         }
-
-        updateUserFields(existingUser, userDTO);
-        return userRepository.save(existingUser);
+        else {
+            updateUserFields(existingUser, userDTO);
+            return userRepository.save(existingUser);
+        }
     }
 
     public void deleteUser(UUID uuid) {

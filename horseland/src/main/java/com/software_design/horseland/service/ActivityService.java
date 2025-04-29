@@ -45,48 +45,36 @@ public class ActivityService {
 
     public Activity addActivity(ActivityDTO activityDTO) throws DatabaseValidationException {
 
-        Activity activity = new Activity();
+        validateActivityDoesNotExist(activityDTO.getName());
 
-        Activity activityByName = getActivityByName(activityDTO.getName());
-        if (activityByName != null) {
+        Activity activity = new Activity();
+        setActivityFields(activity, activityDTO);
+
+        return activityRepository.save(activity);
+    }
+
+    private void validateActivityDoesNotExist(String name) throws DatabaseValidationException {
+        if (getActivityByName(name) != null) {
             throw new DatabaseValidationException("Activity with the same name found");
         }
+    }
 
-        Set<User> participants = new HashSet<>();
-        if (activityDTO.getParticipantsIds() != null) {
-            for (UUID uuid : activityDTO.getParticipantsIds()) {
-                Optional<User> participant = userRepository.findById(uuid);
-
-                if (participant.isPresent()) {
-                    participants.add(participant.get());
-                }
-                else {
-                    throw new DatabaseValidationException("User with uuid " + uuid + " not found");
-                }
-            }
-        }
-
+    private void setActivityFields(Activity activity, ActivityDTO activityDTO) {
         activity.setName(activityDTO.getName());
         activity.setDescription(activityDTO.getDescription());
         activity.setStartDate(activityDTO.getStartDate());
         activity.setEndDate(activityDTO.getEndDate());
-        activity.setParticipants(participants);
-
-        return activityRepository.save(activity);
     }
 
     public Activity updateActivity(UUID uuid, ActivityDTO activityDTO) throws DatabaseValidationException {
         Activity existingActivity = getActivityById(uuid);
 
-        Activity activityByName = getActivityByName(activityDTO.getName());
-        if (activityByName != null && !uuid.equals(activityByName.getId())) {
+        Optional<Activity> activityByName = activityRepository.findByName(activityDTO.getName());
+        if (activityByName.isPresent() && !uuid.equals(activityByName.get().getId())) {
             throw new DatabaseValidationException("Activity with the same name found");
         }
 
-        existingActivity.setName(activityDTO.getName());
-        existingActivity.setDescription(activityDTO.getDescription());
-        existingActivity.setStartDate(activityDTO.getStartDate());
-        existingActivity.setEndDate(activityDTO.getEndDate());
+        setActivityFields(existingActivity, activityDTO);
 
         return activityRepository.save(existingActivity);
     }
@@ -96,10 +84,12 @@ public class ActivityService {
         User user = userRepository.findById(participantId)
                 .orElseThrow(() -> new DatabaseValidationException("User with uuid " + participantId + " not found"));
 
-        if (!activity.getParticipants().add(user)) {
+        if (activity.getParticipants().contains(user)) {
+            System.out.println("Here!");
             throw new DatabaseValidationException("User is already registered for this activity");
         }
 
+        activity.getParticipants().add(user);
         return activityRepository.save(activity);
     }
 
@@ -109,6 +99,7 @@ public class ActivityService {
         // Check if user is a participant
         Optional<User> user = userRepository.findById(participantId);
         if (user.isPresent() && activity.getParticipants().contains(user.get())) {
+
             activity.getParticipants().remove(user.get());
             return activityRepository.save(activity);
         } else {
@@ -125,7 +116,6 @@ public class ActivityService {
     }
 
     public Activity getActivityByName(String name) {
-        Optional<Activity> activityByName = activityRepository.findByName(name);
-        return activityByName.orElse(null);
+        return activityRepository.findByName(name).orElse(null);
     }
 }
