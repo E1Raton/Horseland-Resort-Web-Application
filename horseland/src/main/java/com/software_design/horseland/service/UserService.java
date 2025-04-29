@@ -4,6 +4,7 @@ import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.model.UserDTO;
 import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.util.PasswordUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+
+    private final PasswordUtil passwordUtil;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -38,7 +41,8 @@ public class UserService {
         user.setBirthDate(userDTO.getBirthDate());
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
+        String hashedPassword = passwordUtil.hashPassword(userDTO.getPassword());
+        user.setPassword(hashedPassword);
         user.setRole(userDTO.getRole());
 
         return userRepository.save(user);
@@ -66,10 +70,30 @@ public class UserService {
         existingUser.setBirthDate(userDTO.getBirthDate());
         existingUser.setUsername(userDTO.getUsername());
         existingUser.setEmail(userDTO.getEmail());
-        existingUser.setPassword(userDTO.getPassword());
+        String hashedPassword = passwordUtil.hashPassword(userDTO.getPassword());
+        existingUser.setPassword(hashedPassword);
         existingUser.setRole(userDTO.getRole());
 
         return userRepository.save(existingUser);
+    }
+
+    public User updateUser2(UUID uuid, UserDTO userDTO) throws DatabaseValidationException {
+        return userRepository
+                .findById(uuid)
+                .map(existingUser -> {
+                    existingUser.setFirstName(userDTO.getFirstName());
+                    existingUser.setLastName(userDTO.getLastName());
+                    existingUser.setBirthDate(userDTO.getBirthDate());
+                    existingUser.setUsername(userDTO.getUsername());
+                    existingUser.setEmail(userDTO.getEmail());
+                    String hashedPassword = passwordUtil.hashPassword(userDTO.getPassword());
+                    existingUser.setPassword(hashedPassword);
+                    existingUser.setRole(userDTO.getRole());
+                    return userRepository.save(existingUser);
+                })
+                .orElseThrow(
+                        () -> new DatabaseValidationException("User with uuid " + uuid + " not found")
+                );
     }
 
     public void deleteUser(UUID uuid) {

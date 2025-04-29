@@ -4,6 +4,8 @@ import com.software_design.horseland.events.UserLoginEvent;
 import com.software_design.horseland.model.LoginResponse;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.util.JwtUtil;
+import com.software_design.horseland.util.PasswordUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -18,24 +20,24 @@ public class AuthService {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private final PasswordUtil passwordUtil;
+    private final JwtUtil jwtUtil;
+
     public LoginResponse login(String username, String password) {
         Optional<User> maybeUser = userRepository.findByUsername(username);
         if (maybeUser.isEmpty()) {
             return new LoginResponse(
-                    false,
-                    null,
-                    null,
                     "User with username " + username + " not found"
             );
         }
         User user = maybeUser.get();
-        if (user.getPassword().equals(password)) {
+        if (passwordUtil.checkPassword(password, user.getPassword())) {
             // Publish event
             eventPublisher.publishEvent(new UserLoginEvent(this, user));
-
-            return new LoginResponse(true, user.getId(), user.getRole(), null);
+            String token = jwtUtil.createToken(user);
+            return new LoginResponse(user.getId(), user.getRole(), token);
         } else {
-            return new LoginResponse(false, null, null, "Incorrect password");
+            return new LoginResponse("Incorrect password");
         }
     }
 }

@@ -3,14 +3,13 @@ package com.software_design.horseland.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.software_design.horseland.model.Activity;
-import com.software_design.horseland.model.Notification;
-import com.software_design.horseland.model.NotificationPreference;
-import com.software_design.horseland.model.User;
+import com.software_design.horseland.model.*;
 import com.software_design.horseland.repository.ActivityRepository;
 import com.software_design.horseland.repository.NotificationPreferenceRepository;
 import com.software_design.horseland.repository.NotificationRepository;
 import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.service.UserService;
+import com.software_design.horseland.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +52,12 @@ public class AuthControllerIntegrationTests {
     @Autowired
     private ActivityRepository activityRepository;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     private static final String FIXTURE_PATH = "src/test/resources/fixtures/";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -83,8 +88,12 @@ public class AuthControllerIntegrationTests {
         String seedDataJson = "";
 
         seedDataJson = loadFixture("user_seed.json");
-        List<User> users = objectMapper.readValue(seedDataJson, new TypeReference<List<User>>() {});
-        userRepository.saveAll(users);
+        List<UserDTO> usersDto = objectMapper.readValue(seedDataJson, new TypeReference<>() {});
+        for (UserDTO user : usersDto) {
+            userService.addUser(user);
+        }
+
+        List<User> users = userRepository.findAll();
 
         Activity activity = new Activity();
         activity.setName("Test Activity");
@@ -133,7 +142,10 @@ public class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.userId").exists())
                 .andExpect(jsonPath("$.role").value("STUDENT"));
 
-        mockMvc.perform(get("/notification/" + users.getFirst().getId()))
+        String token = jwtUtil.createToken(users.getFirst());
+
+        mockMvc.perform(get("/notification/" + users.getFirst().getId())
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].message").value("Event in 5 days!"));
@@ -153,7 +165,10 @@ public class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.userId").exists())
                 .andExpect(jsonPath("$.role").value("STUDENT"));
 
-        mockMvc.perform(get("/notification/" + users.getLast().getId()))
+        String token = jwtUtil.createToken(users.getLast());
+
+        mockMvc.perform(get("/notification/" + users.getLast().getId())
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(0));
     }

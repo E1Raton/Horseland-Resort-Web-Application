@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @CrossOrigin
 public class AuthController {
-    private final AuthService loginService;
+    private final AuthService authService;
 
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        LoginResponse loginResponse = loginService.login(loginRequest.username(), loginRequest.password());
+        LoginResponse loginResponse = authService.login(loginRequest.username(), loginRequest.password());
         if (loginResponse.success()) {
             return ResponseEntity.ok(loginResponse);
         } else {

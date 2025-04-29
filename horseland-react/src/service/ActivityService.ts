@@ -4,22 +4,41 @@ import {Activity} from "../model/activity.model.tsx";
 export class ActivityService {
     static async fetchActivities() {
         try {
-            const response = await fetch(`${ACTIVITY_ENDPOINT}`);
+            const token = sessionStorage.getItem('token'); // Or wherever you stored it
+
+            const response = await fetch(`${ACTIVITY_ENDPOINT}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
             if (response.ok) {
                 return await response.json();
             } else {
-                console.error("Failed to fetch activities");
+                const errorText = await response.text();
+                console.error(`Failed to fetch activities: ${response.status} - ${errorText}`);
                 return [];
             }
         } catch (error) {
-            console.error("Error fetching activities:", error);
+            console.error("Network or fetch error:", error);
             return [];
         }
     }
 
+
     static async fetchActivitiesByUserId(userId: string) {
         try {
-            const response = await fetch(`${ACTIVITY_ENDPOINT}/participant/${userId}`);
+            const token = sessionStorage.getItem('token');
+
+            const response = await fetch(`${ACTIVITY_ENDPOINT}/participant/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
             if (response.ok) {
                 return await response.json();
             } else {
@@ -33,9 +52,12 @@ export class ActivityService {
     }
 
     static async createActivity(activity: Omit<Activity, 'id'>): Promise<Activity> {
+        const token = sessionStorage.getItem('token');
+
         const response = await fetch(ACTIVITY_ENDPOINT, {
             method: 'POST',
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(activity),
@@ -69,10 +91,12 @@ export class ActivityService {
     }
 
     static async updateActivity(activityId: string, updatedData: Partial<Activity>): Promise<Activity> {
-        console.log('Updated data: ', updatedData);
+        const token = sessionStorage.getItem('token');
+
         const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}`, {
             method: 'PUT',
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(updatedData),
@@ -106,8 +130,13 @@ export class ActivityService {
     }
 
     static async deleteActivity(activityId: string): Promise<boolean> {
+        const token = sessionStorage.getItem('token');
+
         const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}`, {
             method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
         });
 
         console.log('Delete Activity Response Status:', response.status);
@@ -138,8 +167,16 @@ export class ActivityService {
     }
 
     static async fetchFutureActivities() {
+        const token = sessionStorage.getItem('token');
+
         try {
-            const response = await fetch(`${ACTIVITY_ENDPOINT}/future`);
+            const response = await fetch(`${ACTIVITY_ENDPOINT}/future`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
+            });
             if (response.ok) {
                 return await response.json();
             } else {
@@ -153,9 +190,14 @@ export class ActivityService {
     }
 
     static async registerActivity(activityId: string, userId: string) {
+        const token = sessionStorage.getItem('token');
+
         try {
             const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}/register/${userId}`, {
                 method: "PUT",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
             });
             if (response.ok) {
                 return true;
@@ -170,9 +212,14 @@ export class ActivityService {
     }
 
     static async unregisterActivity(activityId: string, userId: string) {
+        const token = sessionStorage.getItem('token');
+
         try {
             const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}/deregister/${userId}`, {
                 method: "PUT",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
             });
             if (response.ok) {
                 return true;

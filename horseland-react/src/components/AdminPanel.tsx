@@ -97,6 +97,7 @@ const AdminPanel = () => {
         sessionStorage.removeItem('authToken');
         sessionStorage.removeItem("role");
         sessionStorage.removeItem('userId');
+        sessionStorage.removeItem('token');
         navigate('/login');
     };
 

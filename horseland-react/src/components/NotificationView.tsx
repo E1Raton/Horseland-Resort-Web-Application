@@ -21,7 +21,14 @@ const NotificationView: React.FC = () => {
 
         const fetchNotifications = async () => {
             try {
-                const response = await fetch(`${NOTIFICATION_ENDPOINT}/${userId}`);
+                const token = sessionStorage.getItem('token');
+                const response = await fetch(`${NOTIFICATION_ENDPOINT}/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
                 const data = await response.json();
                 setNotifications(data);
             } catch (error) {
@@ -37,9 +44,15 @@ const NotificationView: React.FC = () => {
     const handleDisable = async (activityId: string) => {
         if (!userId) return;
 
+        const token = sessionStorage.getItem('token');
+
         try {
             await fetch(`${NOTIFICATION_ENDPOINT}/${userId}/${activityId}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                }
             });
             setNotifications((prev) =>
                 prev.filter((n) => n.activityId !== activityId)

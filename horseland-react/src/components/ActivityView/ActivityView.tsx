@@ -177,7 +177,7 @@ const ActivityView: React.FC = () => {
                                     <button className="register-button" onClick={() => handleRegister(activity.id)}>Register</button>
                                 )
                             ) : (
-                                <div className="activity-status">Activity has ended</div>
+                                <div className="activity-status">Registration closed</div>
                             )}
                         </div>
                     );

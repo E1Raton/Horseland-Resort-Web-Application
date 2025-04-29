@@ -4,6 +4,8 @@ import com.software_design.horseland.model.LoginResponse;
 import com.software_design.horseland.model.Role;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.util.JwtUtil;
+import com.software_design.horseland.util.PasswordUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,8 +27,17 @@ public class AuthServiceTests {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private PasswordUtil passwordUtil;
+
     @InjectMocks
     private AuthService authService;
+
+    @Mock
+    private ActivityService activityService;
+
+    @Mock
+    private JwtUtil jwtUtil;
 
     @Test
     void testLoginSuccess() {
@@ -34,10 +45,11 @@ public class AuthServiceTests {
         String password = "password";
         User user = new User();
         user.setUsername(username);
-        user.setPassword(password);
+        user.setPassword(passwordUtil.hashPassword(password));
         user.setRole(Role.ADMIN);
 
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(passwordUtil.checkPassword(password, user.getPassword())).thenReturn(true);
         LoginResponse result = authService.login(username, password);
 
         assertTrue(result.success());
@@ -51,7 +63,7 @@ public class AuthServiceTests {
         String password = "password";
         User user = new User();
         user.setUsername(username);
-        user.setPassword("wrong password");
+        user.setPassword(passwordUtil.hashPassword("wrong password"));
 
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         LoginResponse result = authService.login(username, password);

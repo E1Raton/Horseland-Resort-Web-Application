@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.software_design.horseland.model.*;
 import com.software_design.horseland.repository.HorseRepository;
 import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ public class HorseControllerIntegrationTests {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -88,7 +92,9 @@ public class HorseControllerIntegrationTests {
 
     @Test
     void testGetHorsesByOwnerId() throws Exception {
-        mockMvc.perform(get("/horse/owner/" + john.getId()))
+        String token = jwtUtil.createToken(john);
+        mockMvc.perform(get("/horse/owner/" + john.getId())
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].owner.id").value(john.getId().toString()));
@@ -132,9 +138,12 @@ public class HorseControllerIntegrationTests {
         horseDTO.setBirthDate(LocalDate.of(2013, 3, 15));
         horseDTO.setOwnerId(john.getId());
 
+        String token = jwtUtil.createToken(john);
+
         mockMvc.perform(post("/horse/owner/" + john.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(horseDTO)))
+                        .content(objectMapper.writeValueAsString(horseDTO))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Star"))
                 .andExpect(jsonPath("$.owner.id").value(john.getId().toString()));

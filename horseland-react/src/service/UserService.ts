@@ -4,7 +4,15 @@ import { USER_ENDPOINT } from '../constants/api';
 
 export class UserService {
     static async getUsers(): Promise<User[]> {
-        const response = await fetch(USER_ENDPOINT);
+        const token = sessionStorage.getItem('token');
+
+        const response = await fetch(USER_ENDPOINT, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
         if (!response.ok) {
             throw new Error('Failed to fetch users');
         }
@@ -12,9 +20,11 @@ export class UserService {
     }
 
     static async addUser(user: Omit<User, 'id'>): Promise<User> {
+        const token = sessionStorage.getItem('token');
         const response = await fetch(USER_ENDPOINT, {
             method: 'POST',
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(user),
@@ -54,9 +64,11 @@ export class UserService {
     }
 
     static async updateUser(user: User): Promise<void> {
+        const token = sessionStorage.getItem('token');
         const response = await fetch(`${USER_ENDPOINT}/${user.id}`, {
             method: 'PUT',
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(user),
@@ -94,8 +106,12 @@ export class UserService {
     }
 
     static async deleteUser(id: string): Promise<void> {
+        const token = sessionStorage.getItem('token');
         const response = await fetch(`${USER_ENDPOINT}/${id}`, {
             method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
         });
         if (!response.ok) {
             throw new Error('Failed to delete user');

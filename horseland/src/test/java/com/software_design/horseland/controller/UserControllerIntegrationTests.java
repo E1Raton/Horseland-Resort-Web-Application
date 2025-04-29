@@ -3,8 +3,12 @@ package com.software_design.horseland.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.software_design.horseland.model.Role;
 import com.software_design.horseland.model.User;
-import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.model.UserDTO;
+import com.software_design.horseland.repository.*;
+import com.software_design.horseland.service.UserService;
+import com.software_design.horseland.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,8 +24,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,8 +45,25 @@ public class UserControllerIntegrationTests {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private HorseRepository horseRepository;
+
+    @Autowired
+    private ActivityRepository activityRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationPreferenceRepository notificationPreferenceRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
     private static final String FIXTURE_PATH = "src/test/resources/fixtures/";
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private UserService userService;
 
     @PostConstruct
     public void init() {
@@ -49,24 +73,56 @@ public class UserControllerIntegrationTests {
 
     @BeforeEach
     void setUp() throws Exception {
+        notificationRepository.deleteAll();
+        notificationRepository.flush();
+
+        notificationPreferenceRepository.deleteAll();
+        notificationPreferenceRepository.flush();
+
+        activityRepository.deleteAll();
+        activityRepository.flush();
+
+        horseRepository.deleteAll();
+        horseRepository.flush();
+
         userRepository.deleteAll();
         userRepository.flush();
-        seedDatabse();
+
+        seedDatabase();
     }
 
-    private void seedDatabse() throws Exception {
+    private void seedDatabase() throws Exception {
         String seedDataJson = loadFixture("user_seed.json");
-        List<User> users = objectMapper.readValue(seedDataJson, new TypeReference<>() {});
-        userRepository.saveAll(users);
+        List<UserDTO> users = objectMapper.readValue(seedDataJson, new TypeReference<>() {});
+        for (UserDTO user : users) {
+            userService.addUser(user);
+        }
     }
 
     private String loadFixture(String fileName) throws IOException {
         return Files.readString(Paths.get(FIXTURE_PATH + fileName));
     }
 
+    private String getAdminToken() {
+        User user = new User(
+                UUID.randomUUID(),
+                "James",
+                "Bond",
+                LocalDate.of(2000, 1, 30),
+                "bond007", "bond@email.com",
+                "12345678",
+                Role.ADMIN);
+
+        return jwtUtil.createToken(user);
+    }
+
     @Test
     void testGetUsers() throws Exception {
-        mockMvc.perform(get("/user"))
+
+        String token = getAdminToken();
+
+        mockMvc.perform(get("/user")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.length()")
                         .value(2))
@@ -90,9 +146,12 @@ public class UserControllerIntegrationTests {
     void testAddUser_ValidPayload() throws Exception {
         String validUserJson = loadFixture("valid_user.json");
 
+        String token = getAdminToken();
+
         mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(validUserJson))
+                        .content(validUserJson)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.firstName").value("James"))
@@ -100,7 +159,6 @@ public class UserControllerIntegrationTests {
                 .andExpect(jsonPath("$.birthDate").value("1982-10-10"))
                 .andExpect(jsonPath("$.username").value("bond007"))
                 .andExpect(jsonPath("$.email").value("bond@email.com"))
-                .andExpect(jsonPath("$.password").value("12345678"))
                 .andExpect(jsonPath("$.role").value("INSTRUCTOR"));
     }
 
@@ -108,9 +166,12 @@ public class UserControllerIntegrationTests {
     void testAddUser_InvalidPayload() throws Exception {
         String invalidUserJson = loadFixture("invalid_user.json");
 
+        String token = getAdminToken();
+
         mockMvc.perform(post("/user") // Ensure the URL is correct, based on your response "/user"
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidUserJson))
+                        .content(invalidUserJson)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest()) // Expect 400 Bad Request
                 .andExpect(jsonPath("$.message")
                         .value("Validation failed"))

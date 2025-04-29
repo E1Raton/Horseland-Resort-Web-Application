@@ -5,6 +5,7 @@ import com.software_design.horseland.model.Role;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.model.UserDTO;
 import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.util.PasswordUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +28,9 @@ public class UserServiceTests {
 
     @InjectMocks
     private UserService userService;
+
+    @Mock
+    private PasswordUtil passwordUtil;
 
     @Test
     void testGetUsers() {
@@ -54,7 +58,7 @@ public class UserServiceTests {
         userToSave.setBirthDate(LocalDate.of(2003, 8, 12));
         userToSave.setUsername("percy03");
         userToSave.setEmail("percy.jackson@horseland.com");
-        userToSave.setPassword("password");
+        userToSave.setPassword(passwordUtil.hashPassword("password"));
         userToSave.setRole(Role.STUDENT);
 
         User savedUser = new User(userToSave);
@@ -81,7 +85,7 @@ public class UserServiceTests {
         user.setBirthDate(LocalDate.of(2003, 8, 12));
         user.setUsername("percy03");
         user.setEmail("percy.jackson@horseland.com");
-        user.setPassword("password");
+        user.setPassword(passwordUtil.hashPassword("password"));
         user.setRole(Role.STUDENT);
 
         User updatedUser = new User();
@@ -91,7 +95,7 @@ public class UserServiceTests {
         updatedUser.setBirthDate(LocalDate.of(2005, 7, 21));
         updatedUser.setUsername("ela_smith");
         updatedUser.setEmail("ela@example.com");
-        updatedUser.setPassword("password123");
+        updatedUser.setPassword(passwordUtil.hashPassword("password123"));
         updatedUser.setRole(Role.INSTRUCTOR);
 
         UserDTO updatedUserDTO =

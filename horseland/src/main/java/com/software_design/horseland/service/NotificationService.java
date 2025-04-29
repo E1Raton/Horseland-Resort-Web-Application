@@ -51,7 +51,6 @@ public class NotificationService {
 
         for (Activity activity : upcomingActivities) {
             NotificationPreference notificationPreference = notificationPreferenceRepository.findByUserIdAndActivityId(userId, activity.getId());
-            System.out.println("Here!");
             if (notificationPreference != null) {
                 if (notificationPreference.getActive()) {
                     Notification notification = notificationRepository.findByUserIdAndActivityId(userId, activity.getId());
@@ -72,7 +71,6 @@ public class NotificationService {
                 }
             }
             else {
-                System.out.println("I am here!");
                 NotificationPreference newNotificationPreference = new NotificationPreference();
                 newNotificationPreference.setUserId(userId);
                 newNotificationPreference.setActivityId(activity.getId());
