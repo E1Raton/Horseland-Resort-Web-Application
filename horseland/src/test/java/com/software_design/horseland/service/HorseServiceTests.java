@@ -6,6 +6,7 @@ import com.software_design.horseland.model.HorseBreed;
 import com.software_design.horseland.model.HorseDTO;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.repository.HorseRepository;
+import com.software_design.horseland.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ public class HorseServiceTests {
     private HorseRepository horseRepository;
 
     @Mock
-    private UserService userService;
+    private UserRepository userRepository;
 
     @InjectMocks
     private HorseService horseService;
@@ -49,13 +50,13 @@ public class HorseServiceTests {
         Horse savedHorse = new Horse();
         savedHorse.setId(UUID.randomUUID());
 
-        when(userService.getUserById(horseDTO.getOwnerId())).thenReturn(owner);
+        when(userRepository.findById(horseDTO.getOwnerId())).thenReturn(Optional.of(owner));
         when(horseRepository.save(any(Horse.class))).thenReturn(savedHorse);
 
         Horse result = horseService.addHorse(horseDTO);
 
         assertNotNull(result.getId());
-        verify(userService).getUserById(horseDTO.getOwnerId());
+        verify(userRepository).findById(horseDTO.getOwnerId());
         verify(horseRepository).save(any(Horse.class));
     }
 
@@ -76,7 +77,7 @@ public class HorseServiceTests {
         updatedHorse.setName("Bella");
 
         when(horseRepository.findById(horseId)).thenReturn(Optional.of(existingHorse));
-        when(userService.getUserById(ownerId)).thenReturn(owner);
+        when(userRepository.findById(ownerId)).thenReturn(Optional.of(owner));
         when(horseRepository.save(existingHorse)).thenReturn(updatedHorse);
 
         Horse result = horseService.updateHorse(horseId, horseDTO);
