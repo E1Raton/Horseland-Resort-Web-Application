@@ -75,9 +75,23 @@ public class HorseControllerIntegrationTests {
         bella = horseRepository.save(bella);
     }
 
+    private String getAdminToken() {
+        User user = new User(
+                UUID.randomUUID(),
+                "James",
+                "Bond",
+                LocalDate.of(2000, 1, 30),
+                "bond007", "bond@email.com",
+                "12345678",
+                Role.ADMIN);
+
+        return jwtUtil.createToken(user);
+    }
+
     @Test
     void testGetHorses() throws Exception {
-        mockMvc.perform(get("/horse"))
+        mockMvc.perform(get("/horse")
+                        .header("Authorization", "Bearer " + getAdminToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Bella"));
@@ -85,16 +99,16 @@ public class HorseControllerIntegrationTests {
 
     @Test
     void testGetHorseById() throws Exception {
-        mockMvc.perform(get("/horse/" + bella.getId()))
+        mockMvc.perform(get("/horse/" + bella.getId())
+                        .header("Authorization", "Bearer " + getAdminToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Bella"));
     }
 
     @Test
     void testGetHorsesByOwnerId() throws Exception {
-        String token = jwtUtil.createToken(john);
         mockMvc.perform(get("/horse/owner/" + john.getId())
-                        .header("Authorization", "Bearer " + token))
+                        .header("Authorization", "Bearer " + jwtUtil.createToken(john)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].owner.id").value(john.getId().toString()));
@@ -110,7 +124,8 @@ public class HorseControllerIntegrationTests {
 
         mockMvc.perform(post("/horse")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(horseDTO)))
+                        .content(objectMapper.writeValueAsString(horseDTO))
+                        .header("Authorization", "Bearer " + getAdminToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Shadowfax"));
     }
@@ -125,7 +140,8 @@ public class HorseControllerIntegrationTests {
 
         mockMvc.perform(post("/horse")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(horseDTO)))
+                        .content(objectMapper.writeValueAsString(horseDTO))
+                        .header("Authorization", "Bearer " + getAdminToken()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Validation failed"));
     }
@@ -138,12 +154,10 @@ public class HorseControllerIntegrationTests {
         horseDTO.setBirthDate(LocalDate.of(2013, 3, 15));
         horseDTO.setOwnerId(john.getId());
 
-        String token = jwtUtil.createToken(john);
-
         mockMvc.perform(post("/horse/owner/" + john.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(horseDTO))
-                        .header("Authorization", "Bearer " + token))
+                        .header("Authorization", "Bearer " + jwtUtil.createToken(john)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Star"))
                 .andExpect(jsonPath("$.owner.id").value(john.getId().toString()));
@@ -159,7 +173,8 @@ public class HorseControllerIntegrationTests {
 
         mockMvc.perform(put("/horse/" + bella.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedHorse)))
+                        .content(objectMapper.writeValueAsString(updatedHorse))
+                        .header("Authorization", "Bearer " + getAdminToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Bella Updated"))
                 .andExpect(jsonPath("$.breed").value("AXIOS"));
@@ -169,7 +184,8 @@ public class HorseControllerIntegrationTests {
     void testDeleteHorse() throws Exception {
         UUID idToDelete = bella.getId();
 
-        mockMvc.perform(delete("/horse/" + idToDelete))
+        mockMvc.perform(delete("/horse/" + idToDelete)
+                        .header("Authorization", "Bearer " + getAdminToken()))
                 .andExpect(status().isOk());
 
         assertThat(horseRepository.findById(idToDelete)).isEmpty();

@@ -7,9 +7,7 @@ import com.software_design.horseland.repository.UserRepository;
 import com.software_design.horseland.util.PasswordUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,75 +23,55 @@ public class UserService {
 
     public User addUser(UserDTO userDTO) throws DatabaseValidationException {
 
-        User userByUsername = getUserByUsername(userDTO.getUsername());
-        if (userByUsername != null) {
-            throw new DatabaseValidationException("Username already used");
-        }
-
-        User userByEmail = getUserByEmail(userDTO.getEmail());
-        if (userByEmail != null) {
+        if (isEmailAlreadyUsed(userDTO.getEmail(), null)) {
             throw new DatabaseValidationException("Email already used");
         }
 
+        if (isUsernameAlreadyUsed(userDTO.getUsername(), null)) {
+            throw new DatabaseValidationException("Username already used");
+        }
+
         User user = new User();
+        updateUserFields(user, userDTO);
+        return userRepository.save(user);
+    }
+
+    private boolean isEmailAlreadyUsed(String email, UUID uuid) {
+        return userRepository.findByEmail(email)
+                .map(user -> !user.getId().equals(uuid))
+                .orElse(false);
+    }
+
+    private boolean isUsernameAlreadyUsed(String username, UUID uuid) {
+        return userRepository.findByUsername(username)
+                .map(user -> !user.getId().equals(uuid))
+                .orElse(false);
+    }
+
+    private void updateUserFields(User user, UserDTO userDTO) {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setBirthDate(userDTO.getBirthDate());
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        String hashedPassword = passwordUtil.hashPassword(userDTO.getPassword());
-        user.setPassword(hashedPassword);
+        user.setPassword(passwordUtil.hashPassword(userDTO.getPassword()));
         user.setRole(userDTO.getRole());
-
-        return userRepository.save(user);
     }
 
     public User updateUser(UUID uuid, UserDTO userDTO) throws DatabaseValidationException {
-        User existingUser = getUserById(uuid);
+        User existingUser = userRepository.findById(uuid)
+                .orElseThrow(() -> new DatabaseValidationException("User with uuid " + uuid + " not found"));
 
-        if (existingUser == null) {
-            throw new DatabaseValidationException("User with uuid " + uuid + " not found");
-        }
-
-        User userByEmail = getUserByEmail(userDTO.getEmail());
-        if (userByEmail != null && !uuid.equals(userByEmail.getId())) {
+        if (isEmailAlreadyUsed(userDTO.getEmail(), uuid)) {
             throw new DatabaseValidationException("Email already used");
         }
 
-        User userByUsername = getUserByUsername(userDTO.getUsername());
-        if (userByUsername != null && !uuid.equals(userByUsername.getId())) {
+        if (isUsernameAlreadyUsed(userDTO.getUsername(), uuid)) {
             throw new DatabaseValidationException("Username already used");
         }
 
-        existingUser.setFirstName(userDTO.getFirstName());
-        existingUser.setLastName(userDTO.getLastName());
-        existingUser.setBirthDate(userDTO.getBirthDate());
-        existingUser.setUsername(userDTO.getUsername());
-        existingUser.setEmail(userDTO.getEmail());
-        String hashedPassword = passwordUtil.hashPassword(userDTO.getPassword());
-        existingUser.setPassword(hashedPassword);
-        existingUser.setRole(userDTO.getRole());
-
+        updateUserFields(existingUser, userDTO);
         return userRepository.save(existingUser);
-    }
-
-    public User updateUser2(UUID uuid, UserDTO userDTO) throws DatabaseValidationException {
-        return userRepository
-                .findById(uuid)
-                .map(existingUser -> {
-                    existingUser.setFirstName(userDTO.getFirstName());
-                    existingUser.setLastName(userDTO.getLastName());
-                    existingUser.setBirthDate(userDTO.getBirthDate());
-                    existingUser.setUsername(userDTO.getUsername());
-                    existingUser.setEmail(userDTO.getEmail());
-                    String hashedPassword = passwordUtil.hashPassword(userDTO.getPassword());
-                    existingUser.setPassword(hashedPassword);
-                    existingUser.setRole(userDTO.getRole());
-                    return userRepository.save(existingUser);
-                })
-                .orElseThrow(
-                        () -> new DatabaseValidationException("User with uuid " + uuid + " not found")
-                );
     }
 
     public void deleteUser(UUID uuid) {
@@ -101,8 +79,7 @@ public class UserService {
     }
 
     public User getUserByEmail(String email) {
-        Optional<User> userByEmail = userRepository.findByEmail(email);
-        return userByEmail.orElse(null);
+        return userRepository.findByEmail(email).orElse(null);
     }
 
     public User getUserById(UUID uuid) throws DatabaseValidationException {
@@ -111,7 +88,6 @@ public class UserService {
     }
 
     public User getUserByUsername(String username) {
-        Optional<User> userByUsername = userRepository.findByUsername(username);
-        return userByUsername.orElse(null);
+        return userRepository.findByUsername(username).orElse(null);
     }
 }
