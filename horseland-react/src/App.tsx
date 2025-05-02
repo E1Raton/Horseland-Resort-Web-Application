@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./components/Login.tsx";
 import AdminPanel from "./components/AdminPanel.tsx";
 import UserDashboard from "./components/UserDashboard/UserDashboard.tsx";
+import ForgotPassword from "./components/ForgotPassword.tsx";
+import VerifyCode from "./components/VerifyCode.tsx";
+import ResetPassword from "./components/ResetPassword.tsx";
 
 function App() {
     return (
@@ -9,6 +12,10 @@ function App() {
             <Routes>
                 {/* Login Route */}
                 <Route path="/login" element={<Login />} />
+                {/* Forgot Password Route */}
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/verify-code" element={<VerifyCode />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
                 {/* Separate Routes for each role */}
                 <Route path="/admin" element={<AdminPanel />} />

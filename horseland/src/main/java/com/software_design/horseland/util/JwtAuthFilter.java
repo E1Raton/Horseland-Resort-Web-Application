@@ -71,7 +71,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return true;
     }
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -80,8 +79,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        // Allow OPTIONS requests (for CORS preflight) and /login endpoint
-        if ("/auth/login".equals(path) || "OPTIONS".equalsIgnoreCase(method)) {
+        // Allow OPTIONS requests and public auth endpoints
+        if ("OPTIONS".equalsIgnoreCase(method)
+                || "/auth/login".equals(path)
+                || "/auth/request-reset".equals(path)
+                || "/auth/verify-code".equals(path)) {
             log.info("Skipping JWT filter for path: {} and method: {}", path, method);
             filterChain.doFilter(request, response);
             return;

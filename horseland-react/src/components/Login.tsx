@@ -85,6 +85,9 @@ const Login: React.FC = () => {
                 </div>
                 {errorMessage && <p className="error-message">{errorMessage}</p>}
                 <button type="submit">Login</button>
+                <p>
+                    <a href="/forgot-password">Forgot Password?</a>
+                </p>
             </form>
         </div>
     );
