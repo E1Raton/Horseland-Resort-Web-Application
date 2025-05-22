@@ -31,10 +31,9 @@ public class JwtUtil {
                         "userId", user.getId(),
                         "role", user.getRole()
                 ))
-                // the token will be expired in 10 hours
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 *10))
+                // the token will be expired in 15 minutes
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
                 .signWith(getSignInKey(), Jwts.SIG.HS256)
                 .compact();
     }
-
 }

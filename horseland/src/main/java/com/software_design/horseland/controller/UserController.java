@@ -14,7 +14,6 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin // don't use in production
 public class UserController {
     private final UserService userService;
 

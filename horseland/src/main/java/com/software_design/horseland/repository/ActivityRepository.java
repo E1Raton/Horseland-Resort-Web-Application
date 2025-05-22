@@ -18,5 +18,4 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
 
     List<Activity> findByStartDateAfter(LocalDate date);
 
-//    List<Activity> findByParticipantId(UUID participantId);
 }

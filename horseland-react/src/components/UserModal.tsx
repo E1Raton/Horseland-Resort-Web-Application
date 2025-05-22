@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Role } from "../model/user.model.tsx"; // Assuming Role is also exported
+import { User, Role } from "../model/user.model.tsx";
 
 interface UserModalProps {
     isOpen: boolean;
@@ -15,22 +15,20 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
 
     useEffect(() => {
         setUser(initialUser);
-    }, [initialUser]);
+    }, [initialUser, isUpdateMode]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
-        // Check if it's a select element
         if (e.target instanceof HTMLSelectElement) {
             setUser((prev) => ({
                 ...prev,
-                [name]: value as Role, // Role is the type of 'role'
+                [name]: value as Role,
             }));
         } else {
-            // Handle input and textarea fields
             setUser((prev) => ({
                 ...prev,
-                [name]: name === 'birthDate' ? value : value, // Keep as string for simplicity
+                [name]: name === 'birthDate' ? value : value,
             }));
         }
     };
@@ -62,7 +60,6 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
                     />
                 )}
 
-                {/* First Name */}
                 <input
                     type="text"
                     name="firstName"
@@ -71,7 +68,6 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
                     onChange={handleInputChange}
                 />
 
-                {/* Last Name */}
                 <input
                     type="text"
                     name="lastName"
@@ -80,16 +76,14 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
                     onChange={handleInputChange}
                 />
 
-                {/* Birth Date */}
                 <input
                     type="date"
                     name="birthDate"
                     placeholder="Birth Date"
-                    value={user.birthDate instanceof Date ? user.birthDate.toISOString().split("T")[0] : user.birthDate} // Handle Date or string
+                    value={user.birthDate instanceof Date ? user.birthDate.toISOString().split("T")[0] : user.birthDate}
                     onChange={handleInputChange}
                 />
 
-                {/* Username */}
                 <input
                     type="text"
                     name="username"
@@ -98,7 +92,6 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
                     onChange={handleInputChange}
                 />
 
-                {/* Email */}
                 <input
                     type="email"
                     name="email"
@@ -107,16 +100,17 @@ function UserModal({ isOpen, isUpdateMode, initialUser, onClose, onAdd, onUpdate
                     onChange={handleInputChange}
                 />
 
-                {/* Password */}
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={user.password}
-                    onChange={handleInputChange}
-                />
+                {/* Password only shown in add mode */}
+                {!isUpdateMode && (
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Password"
+                        value={user.password}
+                        onChange={handleInputChange}
+                    />
+                )}
 
-                {/* Role */}
                 <select
                     name="role"
                     value={user.role}

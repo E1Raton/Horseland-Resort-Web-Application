@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin
 public class AuthController {
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
@@ -18,40 +17,24 @@ public class AuthController {
     @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         LoginResponse loginResponse = authService.login(loginRequest.username(), loginRequest.password());
-        if (loginResponse.success()) {
-            return ResponseEntity.ok(loginResponse);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(loginResponse);
-        }
+        return loginResponse.success() ? ResponseEntity.ok(loginResponse) : ResponseEntity.status(HttpStatus.UNAUTHORIZED.value()).body(loginResponse);
     }
 
     @PostMapping("/auth/request-reset")
     public ResponseEntity<EmailResponse> requestResetPassword(@RequestBody EmailRequest request) {
         EmailResponse emailResponse = passwordResetService.generateAndSendResetCode(request.email());
-        if (emailResponse.success()) {
-            return ResponseEntity.ok(emailResponse);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(emailResponse);
-        }
+        return emailResponse.success() ? ResponseEntity.ok(emailResponse) : ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(emailResponse);
     }
 
     @PostMapping("/auth/verify-code")
     public ResponseEntity<VerifyCodeResponse> verifyResetCode(@RequestBody VerifyCodeRequest request) {
         VerifyCodeResponse response = passwordResetService.verifyCode(request.email(), request.code());
-        if (response.success()) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
-        }
+        return response.success() ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
     }
 
     @PostMapping("/auth/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         ResetPasswordResponse response = passwordResetService.resetPassword(request.email(), request.password());
-        if (response.success()) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
-        }
+        return response.success() ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
     }
 }

@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())); // ✅ Use lambda here
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }

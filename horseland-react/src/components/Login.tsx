@@ -4,6 +4,7 @@ import axios from 'axios';
 import '../App.css';
 import ThemeSwitcher from './ThemeSwitcher.tsx';
 import { DARK_THEME, LIGHT_THEME } from '../constants/theme.ts';
+import {AUTH_ENDPOINT} from "../constants/api.ts";
 
 const Login: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -17,7 +18,7 @@ const Login: React.FC = () => {
         setErrorMessage('');
 
         try {
-            const response = await axios.post('http://localhost:8080/auth/login', {
+            const response = await axios.post(`${AUTH_ENDPOINT}/login`, {
                 username,
                 password,
             }, {

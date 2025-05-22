@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin
 public class ActivityController {
     private final ActivityService activityService;
 
@@ -66,7 +65,7 @@ public class ActivityController {
     }
 
     @PostMapping("/activity")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public Activity addActivity(@Valid @RequestBody ActivityDTO activityDTO) throws DatabaseValidationException {
         return activityService.addActivity(activityDTO);
     }

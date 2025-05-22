@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {AUTH_ENDPOINT} from "../constants/api.ts";
 
 const ForgotPassword: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ const ForgotPassword: React.FC = () => {
             console.log('Payload:', payload);
 
             const response = await axios.post(
-                'http://localhost:8080/auth/request-reset',
+                `${AUTH_ENDPOINT}/request-reset`,
                 payload,
                 { headers: { 'Content-Type': 'application/json' } }
             );
@@ -47,7 +48,7 @@ const ForgotPassword: React.FC = () => {
 
     return (
         <div className="app-container">
-            <h2>Forgot Password</h2>
+            <h1>Forgot Password</h1>
 
             <div className="form-container">
                 <div className="form-group">

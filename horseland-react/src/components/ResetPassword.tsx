@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {AUTH_ENDPOINT} from "../constants/api.ts";
 
 const ResetPassword: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -38,7 +39,7 @@ const ResetPassword: React.FC = () => {
             console.log('Payload:', payload);
 
             const response = await axios.post(
-                'http://localhost:8080/auth/reset-password',
+                `${AUTH_ENDPOINT}/reset-password`,
                 payload,
                 {
                     headers: {

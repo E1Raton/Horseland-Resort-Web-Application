@@ -14,7 +14,6 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin
 public class HorseController {
     private final HorseService horseService;
 

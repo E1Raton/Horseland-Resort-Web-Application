@@ -1,5 +1,6 @@
 package com.software_design.horseland.service;
 
+import com.software_design.horseland.annotation.Auditable;
 import com.software_design.horseland.model.Activity;
 import com.software_design.horseland.model.Notification;
 import com.software_design.horseland.model.NotificationPreference;
@@ -104,6 +105,7 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
+    @Auditable(operation = "DISABLE NOTIFICATION")
     public void disableAndDeleteNotification(UUID userId, UUID activityId) {
         Optional.ofNullable(notificationPreferenceRepository.findByUserIdAndActivityId(userId, activityId))
                 .ifPresent(pref -> {

@@ -11,7 +11,6 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-@CrossOrigin
 public class NotificationController {
 
     private final NotificationService notificationService;

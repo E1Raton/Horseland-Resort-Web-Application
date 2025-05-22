@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaHorseHead, FaClipboardList, FaBell, FaSignOutAlt } from "react-icons/fa"; // React Icons
 import HorseView from "../HorseView.tsx";
 import ActivityView from "../ActivityView/ActivityView.tsx";
-import "./UserDashboard.css";
+import "./Dashboard.css";
 import NotificationView from "../NotificationView.tsx";
 
 const UserDashboard: React.FC = () => {

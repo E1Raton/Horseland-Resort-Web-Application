@@ -1,5 +1,6 @@
 package com.software_design.horseland.model;
 
+import com.software_design.horseland.util.EncryptDecryptConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class User {
     private String username;
 
     @Column(name = "email", nullable = false, unique = true)
+    @Convert(converter = EncryptDecryptConverter.class)
     private String email;
 
     @Column(name = "password", nullable = false)

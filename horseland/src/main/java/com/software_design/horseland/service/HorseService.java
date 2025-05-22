@@ -1,5 +1,6 @@
 package com.software_design.horseland.service;
 
+import com.software_design.horseland.annotation.Auditable;
 import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.Horse;
 import com.software_design.horseland.model.HorseDTO;
@@ -23,6 +24,7 @@ public class HorseService {
         return horseRepository.findAll();
     }
 
+    @Auditable(operation = "CREATE", entity = Horse.class)
     public Horse addHorse(HorseDTO horseDTO) throws DatabaseValidationException {
         return Optional.of(horseDTO)
                 .map(this::createHorseFromDTO)
@@ -30,6 +32,7 @@ public class HorseService {
                 .orElseThrow(() -> new DatabaseValidationException("Failed to add horse"));
     }
 
+    @Auditable(operation = "CREATE", entity = Horse.class)
     public Horse addHorseToOwner(HorseDTO horseDTO, UUID ownerId) throws DatabaseValidationException {
         return Optional.of(horseDTO)
                 .map(dto -> createHorseWithOwner(dto, ownerId))
@@ -37,6 +40,7 @@ public class HorseService {
                 .orElseThrow(() -> new DatabaseValidationException("Failed to add horse to owner"));
     }
 
+    @Auditable(operation = "UPDATE", entity = Horse.class)
     public Horse updateHorse(UUID uuid, HorseDTO horseDTO) throws DatabaseValidationException {
         return horseRepository.findById(uuid)
                 .map(existing -> updateHorseFields(existing, horseDTO))
@@ -44,6 +48,7 @@ public class HorseService {
                 .orElseThrow(() -> new DatabaseValidationException("Horse with id " + uuid + " not found"));
     }
 
+    @Auditable(operation = "DELETE", entity = Horse.class)
     public void deleteHorse(UUID uuid) {
         Optional.ofNullable(uuid)
                 .ifPresent(horseRepository::deleteById);

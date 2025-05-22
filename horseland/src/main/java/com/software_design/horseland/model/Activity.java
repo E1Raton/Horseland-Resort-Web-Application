@@ -35,7 +35,6 @@ public class Activity {
             joinColumns = @JoinColumn(name = "activity_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-//    @Cascade({org.hibernate.annotations.CascadeType.MERGE})
     private Set<User> participants = new HashSet<>();
 
     public void addParticipant(User user) {

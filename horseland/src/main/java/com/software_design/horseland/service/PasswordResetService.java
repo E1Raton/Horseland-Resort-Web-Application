@@ -35,14 +35,14 @@ public class PasswordResetService {
         }
     }
 
-    // Thread-safe map: email → Token
+    // Thread-safe map: email -> Token
     private final ConcurrentHashMap<String, Token> tokens = new ConcurrentHashMap<>();
 
     // generate and store
     public EmailResponse generateAndSendResetCode(String email) {
         Optional<User> maybeUser = userRepository.findByEmail(email);
         if (maybeUser.isEmpty()) {
-            return new EmailResponse(false, null, "User with email " + email + " not found");
+            return new EmailResponse(false, null, "User with email \"" + email + "\" not found");
         }
 
         String code = String.valueOf(new Random().nextInt(900_000) + 100_000);

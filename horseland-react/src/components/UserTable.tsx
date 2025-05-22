@@ -22,7 +22,6 @@ function UserTable({ data, loading, isError, onRowSelected, theme }: UserTablePr
         },
         { name: 'Username', selector: (row: User) => row.username, sortable: true},
         { name: 'Email', selector: (row: User) => row.email, sortable: true },
-        { name: 'Password', selector: (row: User) => row.password, sortable: true},
         { name: 'Role', selector: (row: User) => row.role, sortable: true }
     ];
 

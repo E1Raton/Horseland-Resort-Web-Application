@@ -24,10 +24,6 @@ public class ActivityDTO {
 
     @AssertTrue(message = "Start date should be before End date")
     private boolean isStartDateBeforeEndDate() {
-        if (startDate != null && endDate != null) {
-            return startDate.isBefore(endDate);
-        } else {
-            return true;
-        }
+        return startDate == null || startDate.isBefore(endDate);
     }
 }

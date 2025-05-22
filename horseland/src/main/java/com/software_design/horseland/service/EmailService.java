@@ -1,5 +1,6 @@
 package com.software_design.horseland.service;
 
+import com.software_design.horseland.annotation.Auditable;
 import lombok.AllArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,6 +12,7 @@ public class EmailService {
 
     private JavaMailSender mailSender;
 
+    @Auditable(operation = "SEND EMAIL")
     public void sendVerificationCode(String toEmail, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);

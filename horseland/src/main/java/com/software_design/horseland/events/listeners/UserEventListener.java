@@ -1,6 +1,8 @@
 package com.software_design.horseland.events.listeners;
 
+import com.software_design.horseland.annotation.Auditable;
 import com.software_design.horseland.events.UserLoginEvent;
+import com.software_design.horseland.model.Notification;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.service.NotificationService;
 import lombok.AllArgsConstructor;
@@ -16,6 +18,7 @@ public class UserEventListener {
 
     @Async
     @EventListener
+    @Auditable(operation = "POST NOTIFICATIONS", entity = Notification.class, username = "#event.user.username")
     public void handleUserLogin(UserLoginEvent event) {
         User user = event.getUser();
         notificationService.addNotifications(user.getId());

@@ -1,5 +1,6 @@
 package com.software_design.horseland.service;
 
+import com.software_design.horseland.annotation.Auditable;
 import com.software_design.horseland.events.UserLoginEvent;
 import com.software_design.horseland.model.LoginResponse;
 import com.software_design.horseland.model.User;
@@ -23,6 +24,7 @@ public class AuthService {
     private final PasswordUtil passwordUtil;
     private final JwtUtil jwtUtil;
 
+    @Auditable(operation = "LOG IN", username = "#username")
     public LoginResponse login(String username, String password) {
         Optional<User> maybeUser = userRepository.findByUsername(username);
         if (maybeUser.isEmpty()) {

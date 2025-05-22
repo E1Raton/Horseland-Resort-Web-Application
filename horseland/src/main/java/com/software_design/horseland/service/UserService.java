@@ -1,5 +1,6 @@
 package com.software_design.horseland.service;
 
+import com.software_design.horseland.annotation.Auditable;
 import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.model.UserDTO;
@@ -21,6 +22,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    @Auditable(operation = "CREATE", entity = User.class)
     public User addUser(UserDTO userDTO) throws DatabaseValidationException {
 
         if (isEmailAlreadyUsed(userDTO.getEmail(), null)) {
@@ -32,6 +34,7 @@ public class UserService {
         else {
             User user = new User();
             updateUserFields(user, userDTO);
+            user.setPassword(passwordUtil.hashPassword(userDTO.getPassword()));
             return userRepository.save(user);
         }
     }
@@ -54,10 +57,10 @@ public class UserService {
         user.setBirthDate(userDTO.getBirthDate());
         user.setUsername(userDTO.getUsername());
         user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordUtil.hashPassword(userDTO.getPassword()));
         user.setRole(userDTO.getRole());
     }
 
+    @Auditable(operation = "UPDATE", entity = User.class)
     public User updateUser(UUID uuid, UserDTO userDTO) throws DatabaseValidationException {
         User existingUser = userRepository.findById(uuid)
                 .orElseThrow(() -> new DatabaseValidationException("User with uuid " + uuid + " not found"));
@@ -74,6 +77,7 @@ public class UserService {
         }
     }
 
+    @Auditable(operation = "DELETE", entity = User.class)
     public void deleteUser(UUID uuid) {
         userRepository.deleteById(uuid);
     }

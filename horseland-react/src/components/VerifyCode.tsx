@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
+import {AUTH_ENDPOINT} from "../constants/api.ts";
 
 interface LocationState {
     email: string;
@@ -29,7 +30,7 @@ const VerifyCode: React.FC = () => {
         setMessage('');
 
         try {
-            const response = await axios.post('http://localhost:8080/auth/verify-code', {
+            const response = await axios.post(`${AUTH_ENDPOINT}/verify-code`, {
                 email,
                 code
             });

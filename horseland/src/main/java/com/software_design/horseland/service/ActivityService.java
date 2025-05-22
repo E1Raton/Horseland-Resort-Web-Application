@@ -1,5 +1,6 @@
 package com.software_design.horseland.service;
 
+import com.software_design.horseland.annotation.Auditable;
 import com.software_design.horseland.exception.DatabaseValidationException;
 import com.software_design.horseland.model.Activity;
 import com.software_design.horseland.model.ActivityDTO;
@@ -43,6 +44,7 @@ public class ActivityService {
                 .collect(Collectors.toList());
     }
 
+    @Auditable(operation = "CREATE", entity = Activity.class)
     public Activity addActivity(ActivityDTO activityDTO) throws DatabaseValidationException {
 
         validateActivityDoesNotExist(activityDTO.getName());
@@ -66,6 +68,7 @@ public class ActivityService {
         activity.setEndDate(activityDTO.getEndDate());
     }
 
+    @Auditable(operation = "UPDATE", entity = Activity.class)
     public Activity updateActivity(UUID uuid, ActivityDTO activityDTO) throws DatabaseValidationException {
         Activity existingActivity = getActivityById(uuid);
 
@@ -79,6 +82,7 @@ public class ActivityService {
         return activityRepository.save(existingActivity);
     }
 
+    @Auditable(operation = "REGISTER", entity = Activity.class)
     public Activity addParticipantToActivity(UUID uuid, UUID participantId) throws DatabaseValidationException {
         Activity activity = getActivityById(uuid); // Throws exception if not found
         User user = userRepository.findById(participantId)
@@ -93,13 +97,13 @@ public class ActivityService {
         return activityRepository.save(activity);
     }
 
+    @Auditable(operation = "UNREGISTER", entity = Activity.class)
     public Activity removeParticipantFromActivity(UUID activityId, UUID participantId) throws DatabaseValidationException {
         Activity activity = getActivityById(activityId);
 
         // Check if user is a participant
         Optional<User> user = userRepository.findById(participantId);
         if (user.isPresent() && activity.getParticipants().contains(user.get())) {
-
             activity.getParticipants().remove(user.get());
             return activityRepository.save(activity);
         } else {
@@ -107,6 +111,7 @@ public class ActivityService {
         }
     }
 
+    @Auditable(operation = "DELETE", entity = Activity.class)
     public void deleteActivity(UUID uuid) {
         activityRepository.deleteById(uuid);
     }
