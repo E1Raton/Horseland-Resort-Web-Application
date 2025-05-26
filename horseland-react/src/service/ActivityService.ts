@@ -1,17 +1,13 @@
 import {ACTIVITY_ENDPOINT} from "../constants/api.ts";
 import {Activity} from "../model/activity.model.tsx";
+import {fetchWithAuth} from "../utils/fetchWithAuth.ts";
 
 export class ActivityService {
     static async fetchActivities() {
         try {
-            const token = sessionStorage.getItem('token'); // Or wherever you stored it
 
-            const response = await fetch(`${ACTIVITY_ENDPOINT}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
+            const response = await fetchWithAuth(`${ACTIVITY_ENDPOINT}`, {
+                method: 'GET'
             });
 
             if (response.ok) {
@@ -30,14 +26,9 @@ export class ActivityService {
 
     static async fetchActivitiesByUserId(userId: string) {
         try {
-            const token = sessionStorage.getItem('token');
 
-            const response = await fetch(`${ACTIVITY_ENDPOINT}/participant/${userId}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                }
+            const response = await fetchWithAuth(`${ACTIVITY_ENDPOINT}/participant/${userId}`, {
+                method: 'GET'
             });
             if (response.ok) {
                 return await response.json();
@@ -52,14 +43,9 @@ export class ActivityService {
     }
 
     static async createActivity(activity: Omit<Activity, 'id'>): Promise<Activity> {
-        const token = sessionStorage.getItem('token');
 
-        const response = await fetch(ACTIVITY_ENDPOINT, {
+        const response = await fetchWithAuth(ACTIVITY_ENDPOINT, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(activity),
         });
 
@@ -91,14 +77,9 @@ export class ActivityService {
     }
 
     static async updateActivity(activityId: string, updatedData: Partial<Activity>): Promise<Activity> {
-        const token = sessionStorage.getItem('token');
 
-        const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}`, {
+        const response = await fetchWithAuth(`${ACTIVITY_ENDPOINT}/${activityId}`, {
             method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(updatedData),
         });
 
@@ -130,13 +111,9 @@ export class ActivityService {
     }
 
     static async deleteActivity(activityId: string): Promise<boolean> {
-        const token = sessionStorage.getItem('token');
 
-        const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}`, {
+        const response = await fetchWithAuth(`${ACTIVITY_ENDPOINT}/${activityId}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
         });
 
         console.log('Delete Activity Response Status:', response.status);
@@ -167,15 +144,10 @@ export class ActivityService {
     }
 
     static async fetchFutureActivities() {
-        const token = sessionStorage.getItem('token');
 
         try {
-            const response = await fetch(`${ACTIVITY_ENDPOINT}/future`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                }
+            const response = await fetchWithAuth(`${ACTIVITY_ENDPOINT}/future`, {
+                method: 'GET'
             });
             if (response.ok) {
                 return await response.json();
@@ -193,7 +165,7 @@ export class ActivityService {
         const token = sessionStorage.getItem('token');
 
         try {
-            const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}/register/${userId}`, {
+            const response = await fetchWithAuth(`${ACTIVITY_ENDPOINT}/${activityId}/register/${userId}`, {
                 method: "PUT",
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -212,14 +184,10 @@ export class ActivityService {
     }
 
     static async unregisterActivity(activityId: string, userId: string) {
-        const token = sessionStorage.getItem('token');
 
         try {
-            const response = await fetch(`${ACTIVITY_ENDPOINT}/${activityId}/deregister/${userId}`, {
-                method: "PUT",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
+            const response = await fetchWithAuth(`${ACTIVITY_ENDPOINT}/${activityId}/deregister/${userId}`, {
+                method: "PUT"
             });
             if (response.ok) {
                 return true;

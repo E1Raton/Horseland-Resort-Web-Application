@@ -3,14 +3,8 @@ package com.software_design.horseland.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.software_design.horseland.model.Activity;
-import com.software_design.horseland.model.Notification;
-import com.software_design.horseland.model.NotificationPreference;
-import com.software_design.horseland.model.User;
-import com.software_design.horseland.repository.ActivityRepository;
-import com.software_design.horseland.repository.NotificationPreferenceRepository;
-import com.software_design.horseland.repository.NotificationRepository;
-import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.model.*;
+import com.software_design.horseland.repository.*;
 import com.software_design.horseland.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,6 +51,9 @@ public class NotificationControllerIntegrationTests {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AuthTokenRepository authTokenRepository;
+
     private static final String FIXTURE_PATH = "src/test/resources/fixtures/";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -78,6 +76,9 @@ public class NotificationControllerIntegrationTests {
 
         userRepository.deleteAll();
         userRepository.flush();
+
+        authTokenRepository.deleteAll();
+        authTokenRepository.flush();
 
         seedDatabase();
     }
@@ -123,6 +124,18 @@ public class NotificationControllerIntegrationTests {
         pref2.setActivityId(activity.getId());
         pref2.setActive(true);
         notificationPreferenceRepository.save(pref2);
+
+        AuthToken authToken1 = new AuthToken();
+        authToken1.setUsername(users.getFirst().getUsername());
+        authToken1.setToken(jwtUtil.createToken(users.getFirst()));
+        authToken1.setExpiryDate(LocalDateTime.now().plusDays(1));
+        authTokenRepository.save(authToken1);
+
+        AuthToken authToken2 = new AuthToken();
+        authToken2.setUsername(users.getLast().getUsername());
+        authToken2.setToken(jwtUtil.createToken(users.getLast()));
+        authToken2.setExpiryDate(LocalDateTime.now().plusDays(1));
+        authTokenRepository.save(authToken2);
     }
 
     private String loadFixture(String fileName) throws IOException {
@@ -133,7 +146,7 @@ public class NotificationControllerIntegrationTests {
     void testGetNotificationsByUserId() throws Exception {
         List<User> users = userRepository.findAll();
 
-        String token = jwtUtil.createToken(users.getFirst());
+        String token = authTokenRepository.findByUsername(users.getFirst().getUsername()).getToken();
 
         mockMvc.perform(get("/notification/" + users.getFirst().getId())
                         .header("Authorization", "Bearer " + token))
@@ -147,7 +160,7 @@ public class NotificationControllerIntegrationTests {
         List<User> users = userRepository.findAll();
         List<Activity> activities = activityRepository.findAll();
 
-        String token = jwtUtil.createToken(users.getFirst());
+        String token = authTokenRepository.findByUsername(users.getFirst().getUsername()).getToken();
 
         mockMvc.perform(delete("/notification/" + users.getFirst().getId() + "/" + activities.getFirst().getId())
                         .header("Authorization", "Bearer " + token));

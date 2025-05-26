@@ -1,5 +1,7 @@
 package com.software_design.horseland.util;
 
+import com.software_design.horseland.model.AuthToken;
+import com.software_design.horseland.repository.AuthTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +30,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Value("${JWT_SECRET}")
     private String secretKey;
+
+    private final AuthTokenRepository authTokenRepository;
+
+    public JwtAuthFilter(AuthTokenRepository authTokenRepository) {
+        this.authTokenRepository = authTokenRepository;
+    }
 
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -102,6 +111,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             boolean isValid = checkClaims(token);
             if (!isValid) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            AuthToken authToken = authTokenRepository.findByToken(token);
+            if (authToken == null) {
+                log.error("Token not found in database (probably logged out)");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            if (authToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+                log.error("Token in database has expired");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }

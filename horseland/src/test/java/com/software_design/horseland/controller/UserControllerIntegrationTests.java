@@ -3,6 +3,7 @@ package com.software_design.horseland.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.software_design.horseland.model.AuthToken;
 import com.software_design.horseland.model.Role;
 import com.software_design.horseland.model.User;
 import com.software_design.horseland.model.UserDTO;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,6 +62,9 @@ public class UserControllerIntegrationTests {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AuthTokenRepository authTokenRepository;
+
     private static final String FIXTURE_PATH = "src/test/resources/fixtures/";
     private static final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
@@ -88,8 +93,13 @@ public class UserControllerIntegrationTests {
         userRepository.deleteAll();
         userRepository.flush();
 
+        authTokenRepository.deleteAll();
+        authTokenRepository.flush();
+
         seedDatabase();
     }
+
+    private AuthToken adminToken;
 
     private void seedDatabase() throws Exception {
         String seedDataJson = loadFixture("user_seed.json");
@@ -97,13 +107,16 @@ public class UserControllerIntegrationTests {
         for (UserDTO user : users) {
             userService.addUser(user);
         }
+
+        adminToken = getAdminToken();
+        authTokenRepository.save(adminToken);
     }
 
     private String loadFixture(String fileName) throws IOException {
         return Files.readString(Paths.get(FIXTURE_PATH + fileName));
     }
 
-    private String getAdminToken() {
+    private AuthToken getAdminToken() {
         User user = new User(
                 UUID.randomUUID(),
                 "James",
@@ -113,13 +126,13 @@ public class UserControllerIntegrationTests {
                 "12345678",
                 Role.ADMIN);
 
-        return jwtUtil.createToken(user);
+        return new AuthToken(jwtUtil.createToken(user), user.getUsername(), LocalDateTime.now().plusDays(1));
     }
 
     @Test
     void testGetUsers() throws Exception {
 
-        String token = getAdminToken();
+        String token = adminToken.getToken();
 
         mockMvc.perform(get("/user")
                         .header("Authorization", "Bearer " + token))
@@ -146,7 +159,7 @@ public class UserControllerIntegrationTests {
     void testAddUser_ValidPayload() throws Exception {
         String validUserJson = loadFixture("valid_user.json");
 
-        String token = getAdminToken();
+        String token = adminToken.getToken();
 
         mockMvc.perform(post("/user")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -166,7 +179,7 @@ public class UserControllerIntegrationTests {
     void testAddUser_InvalidPayload() throws Exception {
         String invalidUserJson = loadFixture("invalid_user.json");
 
-        String token = getAdminToken();
+        String token = adminToken.getToken();
 
         mockMvc.perform(post("/user") // Ensure the URL is correct, based on your response "/user"
                         .contentType(MediaType.APPLICATION_JSON)

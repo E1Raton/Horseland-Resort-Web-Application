@@ -3,6 +3,7 @@ package com.software_design.horseland.service;
 import com.software_design.horseland.model.LoginResponse;
 import com.software_design.horseland.model.Role;
 import com.software_design.horseland.model.User;
+import com.software_design.horseland.repository.AuthTokenRepository;
 import com.software_design.horseland.repository.UserRepository;
 import com.software_design.horseland.util.JwtUtil;
 import com.software_design.horseland.util.PasswordUtil;
@@ -34,10 +35,10 @@ public class AuthServiceTests {
     private AuthService authService;
 
     @Mock
-    private ActivityService activityService;
+    private JwtUtil jwtUtil;
 
     @Mock
-    private JwtUtil jwtUtil;
+    private AuthTokenService authTokenService;
 
     @Test
     void testLoginSuccess() {
@@ -50,6 +51,7 @@ public class AuthServiceTests {
 
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         when(passwordUtil.checkPassword(password, user.getPassword())).thenReturn(true);
+        when(authTokenService.findByUsername(username)).thenReturn(null);
         LoginResponse result = authService.login(username, password);
 
         assertTrue(result.success());

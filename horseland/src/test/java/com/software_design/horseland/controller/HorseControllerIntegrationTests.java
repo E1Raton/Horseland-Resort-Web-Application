@@ -3,6 +3,7 @@ package com.software_design.horseland.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.software_design.horseland.model.*;
+import com.software_design.horseland.repository.AuthTokenRepository;
 import com.software_design.horseland.repository.HorseRepository;
 import com.software_design.horseland.repository.UserRepository;
 import com.software_design.horseland.util.JwtUtil;
@@ -17,6 +18,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,10 +42,15 @@ public class HorseControllerIntegrationTests {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AuthTokenRepository authTokenRepository;
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private User john;
     private Horse bella;
+    private AuthToken adminToken;
+    private AuthToken johnToken;
 
     @PostConstruct
     public void init() {
@@ -54,6 +61,7 @@ public class HorseControllerIntegrationTests {
     void setUp() {
         horseRepository.deleteAll();
         userRepository.deleteAll();
+        authTokenRepository.deleteAll();
 
         john = new User();
         john.setFirstName("John");
@@ -73,9 +81,15 @@ public class HorseControllerIntegrationTests {
         bella.setOwner(john);
 
         bella = horseRepository.save(bella);
+
+        adminToken = getAdminToken();
+        authTokenRepository.save(adminToken);
+
+        johnToken = new AuthToken(jwtUtil.createToken(john), john.getUsername(), LocalDateTime.now().plusDays(1));
+        authTokenRepository.save(johnToken);
     }
 
-    private String getAdminToken() {
+    private AuthToken getAdminToken() {
         User user = new User(
                 UUID.randomUUID(),
                 "James",
@@ -85,13 +99,13 @@ public class HorseControllerIntegrationTests {
                 "12345678",
                 Role.ADMIN);
 
-        return jwtUtil.createToken(user);
+        return new AuthToken(jwtUtil.createToken(user), user.getUsername(), LocalDateTime.now().plusDays(1));
     }
 
     @Test
     void testGetHorses() throws Exception {
         mockMvc.perform(get("/horse")
-                        .header("Authorization", "Bearer " + getAdminToken()))
+                        .header("Authorization", "Bearer " + adminToken.getToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Bella"));
@@ -100,7 +114,7 @@ public class HorseControllerIntegrationTests {
     @Test
     void testGetHorseById() throws Exception {
         mockMvc.perform(get("/horse/" + bella.getId())
-                        .header("Authorization", "Bearer " + getAdminToken()))
+                        .header("Authorization", "Bearer " + adminToken.getToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Bella"));
     }
@@ -108,7 +122,7 @@ public class HorseControllerIntegrationTests {
     @Test
     void testGetHorsesByOwnerId() throws Exception {
         mockMvc.perform(get("/horse/owner/" + john.getId())
-                        .header("Authorization", "Bearer " + jwtUtil.createToken(john)))
+                        .header("Authorization", "Bearer " + johnToken.getToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].owner.id").value(john.getId().toString()));
@@ -125,7 +139,7 @@ public class HorseControllerIntegrationTests {
         mockMvc.perform(post("/horse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(horseDTO))
-                        .header("Authorization", "Bearer " + getAdminToken()))
+                        .header("Authorization", "Bearer " + adminToken.getToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Shadowfax"));
     }
@@ -141,7 +155,7 @@ public class HorseControllerIntegrationTests {
         mockMvc.perform(post("/horse")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(horseDTO))
-                        .header("Authorization", "Bearer " + getAdminToken()))
+                        .header("Authorization", "Bearer " + adminToken.getToken()))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Validation failed"));
     }
@@ -157,7 +171,7 @@ public class HorseControllerIntegrationTests {
         mockMvc.perform(post("/horse/owner/" + john.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(horseDTO))
-                        .header("Authorization", "Bearer " + jwtUtil.createToken(john)))
+                        .header("Authorization", "Bearer " + johnToken.getToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Star"))
                 .andExpect(jsonPath("$.owner.id").value(john.getId().toString()));
@@ -174,7 +188,7 @@ public class HorseControllerIntegrationTests {
         mockMvc.perform(put("/horse/" + bella.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedHorse))
-                        .header("Authorization", "Bearer " + getAdminToken()))
+                        .header("Authorization", "Bearer " + adminToken.getToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Bella Updated"))
                 .andExpect(jsonPath("$.breed").value("AXIOS"));
@@ -185,7 +199,7 @@ public class HorseControllerIntegrationTests {
         UUID idToDelete = bella.getId();
 
         mockMvc.perform(delete("/horse/" + idToDelete)
-                        .header("Authorization", "Bearer " + getAdminToken()))
+                        .header("Authorization", "Bearer " + adminToken.getToken()))
                 .andExpect(status().isOk());
 
         assertThat(horseRepository.findById(idToDelete)).isEmpty();

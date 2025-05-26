@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.software_design.horseland.model.*;
-import com.software_design.horseland.repository.ActivityRepository;
-import com.software_design.horseland.repository.NotificationPreferenceRepository;
-import com.software_design.horseland.repository.NotificationRepository;
-import com.software_design.horseland.repository.UserRepository;
+import com.software_design.horseland.repository.*;
 import com.software_design.horseland.service.UserService;
 import com.software_design.horseland.util.JwtUtil;
 import jakarta.annotation.PostConstruct;
@@ -25,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -58,6 +56,9 @@ public class AuthControllerIntegrationTests {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AuthTokenRepository authTokenRepository;
+
     private static final String FIXTURE_PATH = "src/test/resources/fixtures/";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -80,6 +81,9 @@ public class AuthControllerIntegrationTests {
 
         userRepository.deleteAll();
         userRepository.flush();
+
+        authTokenRepository.deleteAll();
+        authTokenRepository.flush();
 
         seedDatabase();
     }
@@ -122,6 +126,18 @@ public class AuthControllerIntegrationTests {
         pref2.setActivityId(activity.getId());
         pref2.setActive(false);
         notificationPreferenceRepository.save(pref2);
+
+        AuthToken authToken1 = new AuthToken();
+        authToken1.setUsername(users.getFirst().getUsername());
+        authToken1.setToken(jwtUtil.createToken(users.getFirst()));
+        authToken1.setExpiryDate(LocalDateTime.now().plusDays(1));
+        authTokenRepository.save(authToken1);
+
+        AuthToken authToken2 = new AuthToken();
+        authToken2.setUsername(users.getLast().getUsername());
+        authToken2.setToken(jwtUtil.createToken(users.getLast()));
+        authToken2.setExpiryDate(LocalDateTime.now().plusDays(1));
+        authTokenRepository.save(authToken2);
     }
 
     private String loadFixture(String fileName) throws IOException {
@@ -131,6 +147,7 @@ public class AuthControllerIntegrationTests {
     @Test
     void testLoginAndNotification() throws Exception {
         List<User> users = userRepository.findAll();
+        String token = authTokenRepository.findByUsername(users.getFirst().getUsername()).getToken();
 
         String validLoginJson = loadFixture("valid_login_john.json");
 
@@ -141,8 +158,6 @@ public class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.userId").exists())
                 .andExpect(jsonPath("$.role").value("STUDENT"));
-
-        String token = jwtUtil.createToken(users.getFirst());
 
         mockMvc.perform(get("/notification/" + users.getFirst().getId())
                         .header("Authorization", "Bearer " + token))
@@ -154,8 +169,9 @@ public class AuthControllerIntegrationTests {
     @Test
     void testLogiAndNoNotification() throws Exception {
         List<User> users = userRepository.findAll();
+        String token = authTokenRepository.findByUsername(users.getLast().getUsername()).getToken();
 
-        String validLoginJson = loadFixture("valid_login_john.json");
+        String validLoginJson = loadFixture("valid_login_jane.json");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -164,8 +180,6 @@ public class AuthControllerIntegrationTests {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.userId").exists())
                 .andExpect(jsonPath("$.role").value("STUDENT"));
-
-        String token = jwtUtil.createToken(users.getLast());
 
         mockMvc.perform(get("/notification/" + users.getLast().getId())
                         .header("Authorization", "Bearer " + token))

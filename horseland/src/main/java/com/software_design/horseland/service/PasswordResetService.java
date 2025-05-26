@@ -1,9 +1,6 @@
 package com.software_design.horseland.service;
 
-import com.software_design.horseland.model.EmailResponse;
-import com.software_design.horseland.model.ResetPasswordResponse;
-import com.software_design.horseland.model.User;
-import com.software_design.horseland.model.VerifyCodeResponse;
+import com.software_design.horseland.model.*;
 import com.software_design.horseland.repository.UserRepository;
 import com.software_design.horseland.util.JwtUtil;
 import com.software_design.horseland.util.PasswordUtil;
@@ -12,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Random;
@@ -25,6 +23,7 @@ public class PasswordResetService {
     private final EmailService emailService;
     private final JwtUtil jwtUtil;
     private final PasswordUtil passwordUtil;
+    private final AuthTokenService authTokenService;
 
     private static class Token {
         String code;
@@ -67,7 +66,13 @@ public class PasswordResetService {
 
             User user = userRepository.findByEmail(email).orElse(null);
             assert user != null;
-            return new VerifyCodeResponse(true, jwtUtil.createToken(user), null);
+
+            // Generate new token for the user
+            String newToken = jwtUtil.createToken(user);
+            AuthToken newAuthToken = new AuthToken(newToken, user.getUsername(), LocalDateTime.now().plusMinutes(5));
+            authTokenService.addAuthToken(newAuthToken);
+
+            return new VerifyCodeResponse(true, newToken, null);
         }
 
         return new VerifyCodeResponse(false, null, "Code is incorrect");

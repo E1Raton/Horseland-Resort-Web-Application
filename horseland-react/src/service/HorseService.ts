@@ -1,16 +1,12 @@
 import { Horse } from '../model/horse.model.tsx';
 import {HORSE_ENDPOINT} from '../constants/api';
+import {fetchWithAuth} from "../utils/fetchWithAuth.ts";
 
 export class HorseService {
     static async getHorses(ownerId: string): Promise<Horse[]> {
-        const token = sessionStorage.getItem('token');
 
-        const response = await fetch(`${HORSE_ENDPOINT}/owner/${ownerId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
+        const response = await fetchWithAuth(`${HORSE_ENDPOINT}/owner/${ownerId}`, {
+            method: 'GET'
         });
         if (!response.ok) {
             throw new Error('Failed to fetch horses');
@@ -19,14 +15,9 @@ export class HorseService {
     }
 
     static async getHorsesByOwnerId(ownerId: string): Promise<Horse[]> {
-        const token = sessionStorage.getItem('token');
 
-        const response = await fetch(`${HORSE_ENDPOINT}/owner/${ownerId}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            }
+        const response = await fetchWithAuth(`${HORSE_ENDPOINT}/owner/${ownerId}`, {
+            method: 'GET'
         });
         if (!response.ok) {
             throw new Error('Failed to fetch horses for the user');
@@ -35,14 +26,9 @@ export class HorseService {
     }
 
     static async addHorse(horse: Omit<Horse, 'id'>): Promise<Horse> {
-        const token = sessionStorage.getItem('token');
 
-        const response = await fetch(HORSE_ENDPOINT, {
+        const response = await fetchWithAuth(HORSE_ENDPOINT, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(horse),
         });
 
@@ -85,18 +71,12 @@ export class HorseService {
         // Ensure ownerId is part of the horse object
         const horseWithOwnerId = { ...horse, ownerId };
 
-        const token = sessionStorage.getItem('token');
-
         try {
             console.log("Sending POST request to:", url);
             console.log("Request Body:", JSON.stringify(horseWithOwnerId));
 
-            const response = await fetch(url, {
+            const response = await fetchWithAuth(url, {
                 method: 'POST', // Confirm your backend expects POST here
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(horseWithOwnerId),
             });
 
@@ -149,14 +129,8 @@ export class HorseService {
 
         console.log('Sending update request:', updatedHorse);  // Debug log
 
-        const token = sessionStorage.getItem('token');
-
-        const response = await fetch(`${HORSE_ENDPOINT}/${horse.id}`, {
+        const response = await fetchWithAuth(`${HORSE_ENDPOINT}/${horse.id}`, {
             method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
             body: JSON.stringify(updatedHorse),  // Send the horse object as payload
         });
 
@@ -188,12 +162,8 @@ export class HorseService {
     }
 
     static async deleteHorse(id: string): Promise<void> {
-        const token = sessionStorage.getItem('token');
-        const response = await fetch(`${HORSE_ENDPOINT}/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            }
+        const response = await fetchWithAuth(`${HORSE_ENDPOINT}/${id}`, {
+            method: 'DELETE'
         });
         if (!response.ok) {
             throw new Error('Failed to delete horse');

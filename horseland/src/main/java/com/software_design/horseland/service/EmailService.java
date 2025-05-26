@@ -12,7 +12,7 @@ public class EmailService {
 
     private JavaMailSender mailSender;
 
-    @Auditable(operation = "SEND EMAIL")
+    @Auditable(operation = "SEND EMAIL", username = "#toEmail")
     public void sendVerificationCode(String toEmail, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
