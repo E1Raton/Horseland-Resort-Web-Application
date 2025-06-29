@@ -48,7 +48,6 @@ public class HorseController {
     }
 
     @PutMapping("/horse/{uuid}")
-    @PreAuthorize("hasRole('ADMIN')")
     public Horse updateHorse(@PathVariable UUID uuid, @Valid @RequestBody HorseDTO horseDTO) throws DatabaseValidationException {
         return horseService.updateHorse(uuid, horseDTO);
     }
